@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit
 
 object TransformationDesign {
 
-//  type Transformation = SparkSession => DataFrame
-//
+  type Transformation = SparkSession => DataFrame
+
 //  def unit(df: DataFrame): Transformation = _ => df
 //
 //  //  def provide(id: String): Transformation = spark => ???
