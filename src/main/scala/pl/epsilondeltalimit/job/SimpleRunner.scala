@@ -3,8 +3,7 @@ package pl.epsilondeltalimit.job
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import pl.epsilondeltalimit.job.AsyncJob.AsyncJob
-import pl.epsilondeltalimit.job.Job.Job
+import pl.epsilondeltalimit.job.AsyncSparkJob.AsyncSparkJob
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
