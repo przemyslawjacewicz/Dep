@@ -1,15 +1,14 @@
 package pl.epsilondeltalimit.context
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 
 // this context cannot be shard between many jobs
-class SimpleImmutableContext[T <: {val id: String}](val m: Map[String, Future[T]] = Map.empty[String, Future[T]]) extends Context[T] {
+class SimpleImmutableContext[T <: {val id: String}](val m: Map[String, ExecutionContext => Future[T]] = Map.empty) extends AsyncJobContext[T] {
 
   private val ps: mutable.Map[String, Promise[Unit]] = mutable.Map.empty
 
-  override def register(t: T, f: => Future[T]): Context[T] = {
+  override def register(t: T, f: ExecutionContext => Future[T]): AsyncJobContext[T] = {
     val p = Promise[Unit]
     ps.put(t.id, p)
     p.success(())
@@ -18,7 +17,7 @@ class SimpleImmutableContext[T <: {val id: String}](val m: Map[String, Future[T]
     new SimpleImmutableContext[T](m + ((t.id, lazyF)))
   }
 
-  override def getWithId(id: String): Future[T] = ???
+  override def getForId(id: String): ExecutionContext => Future[T] = ???
 
-  override def exec(): Unit = ???
+  override def exec(ec: ExecutionContext): Unit = ???
 }

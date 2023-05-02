@@ -1,10 +1,13 @@
 package pl.epsilondeltalimit.job
 
 import org.apache.spark.sql.SparkSession
-import pl.epsilondeltalimit.context.Context
+import pl.epsilondeltalimit.context.AsyncJobContext
 
-object AsyncJob {
-  type AsyncJob[T <: {val id: String}] = (SparkSession, Context[T]) => Context[T]
+import scala.concurrent.ExecutionContext
+
+object AsyncSparkJob {
+
+  type AsyncSparkJob[T <: {val id: String}] = (SparkSession, AsyncJobContext[T]) => AsyncJobContext[T]
 
   //  def unit(f: Future[DataFrame]): AsyncJob = _ => f
 
