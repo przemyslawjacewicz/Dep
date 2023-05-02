@@ -22,7 +22,7 @@ class SimpleMutableContext[T <: {val id: String}] extends Context[T] {
     this
   }
 
-  override def getForId(id: String): Future[T] = {
+  override def getWithId(id: String): Future[T] = {
     if (!ps.contains(id)) {
       println(s"getForId: promise for id=$id not found, adding.")
       ps.put(id, Promise[Unit])

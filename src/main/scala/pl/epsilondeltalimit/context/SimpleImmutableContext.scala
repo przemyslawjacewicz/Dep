@@ -18,7 +18,7 @@ class SimpleImmutableContext[T <: {val id: String}](val m: Map[String, Future[T]
     new SimpleImmutableContext[T](m + ((t.id, lazyF)))
   }
 
-  override def getForId(id: String): Future[T] = ???
+  override def getWithId(id: String): Future[T] = ???
 
   override def exec(): Unit = ???
 }

@@ -39,8 +39,8 @@ object TableRunner {
     // a table with dependency
     val t2 = Table("t2", Files.createTempDirectory(null).resolve("t2").toString)
     val job2: AsyncJob[Table] = (spark, context) => {
-      context.register(t2, for {
-        t1 <- context.getForId("t1")
+      val f = for {
+        t1 <- context.getWithId("t1")
       } yield {
         val df = t1.getDF()(spark).unionByName(
           spark.createDataFrame(
@@ -55,7 +55,9 @@ object TableRunner {
 
         println("Table processed: " + t1)
         t2
-      })
+      }
+
+      context.register(t2, f)
     }
 
     val spark = SparkSession.builder
@@ -68,7 +70,7 @@ object TableRunner {
 
     val context = new SimpleMutableContext[Table]
     job2(spark, context)
-    job1(spark, context)
+//    job1(spark, context)
 
     //    val context = job2(spark, new SimpleImmutableContext[Table])
     //    val context = job2(spark, job1(spark, new SimpleImmutableContext[Table]))
