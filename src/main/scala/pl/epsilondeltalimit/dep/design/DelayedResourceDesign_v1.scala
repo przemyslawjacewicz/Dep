@@ -1,4 +1,4 @@
-package pl.epsilondeltalimit.design
+package pl.epsilondeltalimit.dep.design
 
 import org.apache.spark.sql.DataFrame
 
