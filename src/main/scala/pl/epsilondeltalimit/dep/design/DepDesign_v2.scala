@@ -17,8 +17,7 @@ object DepDesign_v2 {
   // dependencies = other resources that need to be available to evaluate this resource
   // example: a dataframe read from filesystem that is dependent on other dataframes i.e. to get this dataframe we need
   // to join/union between other dataframes that are also read from filesystem
-  trait Dep[A] extends (Register => A )
-
+  trait Dep[A] extends (Register => A)
 
   object Dep {
 
@@ -54,13 +53,13 @@ object DepDesign_v2 {
       ???
   }
 
-  def processBlocking(id1: String, id2: String): DataFrame = {
-    val df1 = Dep.run(Dep.checkout[DataFrame](id1)) // has no dependencies -> can be checked directly
-    val df2 = Dep.run(Dep.checkout[DataFrame](id2)) // has no dependencies -> can be checked directly
+  def processBlocking(r: Register)(id1: String, id2: String): DataFrame = {
+    val df1 = Dep.run(r)(Dep.checkout[DataFrame](id1)) // has no dependencies -> can be checked directly
+    val df2 = Dep.run(r)(Dep.checkout[DataFrame](id2)) // has no dependencies -> can be checked directly
     df1.unionByName(df2)
   }
 
-  def process(id1: String, id2: String): DataFrame = {
+  def process(r: Register)(id1: String, id2: String): DataFrame = {
     val dep1 = Dep.checkout[DataFrame](id1)
     val dep2 = Dep.checkout[DataFrame](id2)
 
@@ -68,7 +67,7 @@ object DepDesign_v2 {
 
     Dep.commit(dep, "dep", id1, id2)
 
-    Dep.run(Dep.checkout("dep"))
+    Dep.run(r)(Dep.checkout("dep"))
   }
 
 }
