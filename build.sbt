@@ -1,4 +1,4 @@
-name := "SparkAsyncJobScheduler"
+name := "Dep"
 
 version := "0.1"
 
