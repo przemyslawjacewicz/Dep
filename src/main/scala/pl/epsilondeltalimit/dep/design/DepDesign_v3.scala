@@ -43,29 +43,48 @@ object DepDesign_v3 {
       .master("local[2]")
       .getOrCreate()
 
-    val aPath = new Path("/", new Path("tmp", new Random().nextString(10))).toString
-    println(s"aPath=$aPath")
+    /* 1 */
+//    val aPath = new Path("/", new Path("tmp", new Random().nextString(10))).toString
+//    println(s"aPath=$aPath")
+//    val a = unit("a") {
+//      val df = spark.createDataFrame(
+//        spark.sparkContext.parallelize(Seq(Row(1, 1L, "a"))),
+//        StructType.fromDDL("f1 INT, f2 LONG, f3 STRING")
+//      )
+//      df.write.save(aPath)
+//    }
+//
+//    val bPath = new Path("/", new Path("tmp", new Random().nextString(10))).toString
+//    println(s"bPath=$bPath")
+//    val b = unit("b") {
+//      val df = spark.createDataFrame(
+//        spark.sparkContext.parallelize(Seq(Row(2, 2L, "b"))),
+//        StructType.fromDDL("f1 INT, f2 LONG, f3 STRING")
+//      )
+//      df.write.save(bPath)
+//    }
+//
+//    run(map2("c")(a, b)((_, _) => spark.read.load(aPath).unionByName(spark.read.load(bPath)))).show()
+//
+//    run(map(a)(_ => spark.read.load(aPath))).show()
+
+    /* 2 */
     val a = unit("a") {
-      val df = spark.createDataFrame(
+      println("evaluating a")
+      spark.createDataFrame(
         spark.sparkContext.parallelize(Seq(Row(1, 1L, "a"))),
         StructType.fromDDL("f1 INT, f2 LONG, f3 STRING")
       )
-      df.write.save(aPath)
     }
-
-    val bPath = new Path("/", new Path("tmp", new Random().nextString(10))).toString
-    println(s"bPath=$bPath")
     val b = unit("b") {
-      val df = spark.createDataFrame(
+      println("evaluating b")
+      spark.createDataFrame(
         spark.sparkContext.parallelize(Seq(Row(2, 2L, "b"))),
         StructType.fromDDL("f1 INT, f2 LONG, f3 STRING")
       )
-      df.write.save(bPath)
     }
 
-    run(map2("c")(a, b)((_, _) => spark.read.load(aPath).unionByName(spark.read.load(bPath)))).show()
-
-    run(map(a)(_ => spark.read.load(aPath))).show()
+    run(map2("c")(a, b)((aDF, bDF) => aDF.unionByName(bDF))).show()
 
   }
 }
