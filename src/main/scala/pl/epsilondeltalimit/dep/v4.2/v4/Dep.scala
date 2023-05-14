@@ -1,10 +1,10 @@
-package pl.epsilondeltalimit.dep.v4
+package pl.epsilondeltalimit.dep.v4.2.v4
 
 import scala.language.implicitConversions
 
-class Dep[A](val uid: String, val deps: Set[String])(a: Register[A] => Register[A])
-    extends (Register[A] => Register[A]) {
-  override def apply(r: Register[A]): Register[A] = a(r)
+class Dep(val uid: String, val deps: Set[String])(a: Register => Register)
+    extends (Register => Register) {
+  override def apply(r: Register): Register = a(r)
 }
 
 object Dep {
