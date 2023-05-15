@@ -15,9 +15,6 @@ object Dep {
   def map2[A, B, C](uid: String)(aUid: String, bUid: String)(f: (A, B) => C): Dep =
     new Dep(uid, Set(aUid, bUid))(r => r.put[C](uid, f(r.get[A](aUid)(), r.get[B](bUid)())))
 
-//  def mapN[A](uid: String)(deps: String*)(f: Seq[A] => A): Dep[A] =
-//    new Dep[A](uid, deps.toSet)(r => r.put(uid, f(deps.map(dUid => r.get(dUid)()))))
-
   // todo: simplistic implementation => should be replaced with a solution based on graph
   def run[A](r: Register)(deps: Dep*): Register = {
     val uidToDep = deps.foldLeft(Map.empty[String, Dep]) { (acc, d) =>
