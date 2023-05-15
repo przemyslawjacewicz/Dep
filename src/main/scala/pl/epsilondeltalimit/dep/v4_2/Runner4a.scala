@@ -1,15 +1,15 @@
-package pl.epsilondeltalimit.dep.v4.2.v4
+package pl.epsilondeltalimit.dep.v4_2
 
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row}
 import pl.epsilondeltalimit.SparkSessionProvider
-import pl.epsilondeltalimit.dep.v4.Dep._
+import pl.epsilondeltalimit.dep.v4_2.Dep._
 
 object Runner4a extends SparkSessionProvider {
   def main(args: Array[String]): Unit = {
-    val d = map2[DataFrame]("d")("c", "b")( (c,d) => c.unionByName(d)  )
+    val d = map2("d")("c", "b")((c: Long, b: DataFrame) => c + b.count())
 
-    val c = map2[DataFrame]("c")("a", "b")((a, b) => a.unionByName(b))
+    val c = map2("c")("a", "b")((a: DataFrame, b: DataFrame) => a.unionByName(b).count())
 
     val b = unit("b") {
       println("evaluating b")
@@ -28,7 +28,16 @@ object Runner4a extends SparkSessionProvider {
 
     //    c(b(a(new SimpleRegister[DataFrame]))).get("c").show()
 
-    run(new SimpleRegister[DataFrame])(d, c, b, a).get("d")().show()
+    run(new SimpleRegister)(a).get[DataFrame]("a")().show()
+
+
+    println(
+        run(new SimpleRegister)(c, b, a).get[Long]("c")()
+    )
+
+    println(
+      run(new SimpleRegister)(d, c, b, a).get[Long]("d")()
+    )
 
   }
 }

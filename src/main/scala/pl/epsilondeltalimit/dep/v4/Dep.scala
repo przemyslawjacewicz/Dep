@@ -8,7 +8,7 @@ class Dep[A](val uid: String, val deps: Set[String])(a: Register[A] => Register[
 }
 
 object Dep {
-  import Once.implicits._
+  import pl.epsilondeltalimit.dep.v4.Once.implicits._
 
   def unit[A](uid: String)(a: => A): Dep[A] =
     new Dep[A](uid, Set.empty)(r => r.put(uid, a))

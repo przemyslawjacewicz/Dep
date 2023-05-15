@@ -3,11 +3,11 @@ package pl.epsilondeltalimit.dep.v4
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row}
 import pl.epsilondeltalimit.SparkSessionProvider
-import pl.epsilondeltalimit.dep.v4.Dep._
+import pl.epsilondeltalimit.dep.v4.Dep.{map2, run, unit}
 
 object Runner4a extends SparkSessionProvider {
   def main(args: Array[String]): Unit = {
-    val d = map2[DataFrame]("d")("c", "b")( (c,d) => c.unionByName(d)  )
+    val d = map2[DataFrame]("d")("c", "b")((c, d) => c.unionByName(d))
 
     val c = map2[DataFrame]("c")("a", "b")((a, b) => a.unionByName(b))
 

@@ -1,4 +1,4 @@
-package pl.epsilondeltalimit.dep.v4.2.v4
+package pl.epsilondeltalimit.dep.v4_2
 
 import scala.language.implicitConversions
 
