@@ -9,12 +9,6 @@ class Dep(val uid: String, val deps: Set[String])(a: Register => Register) exten
 object Dep {
   import Once.implicits._
 
-  def unit[A](uid: String)(a: => A): Dep =
-    new Dep(uid, Set.empty)(r => r.put[A](uid, a))
-
-  def map2[A, B, C](uid: String)(aUid: String, bUid: String)(f: (A, B) => C): Dep =
-    new Dep(uid, Set(aUid, bUid))(r => r.put[C](uid, f(r.get[A](aUid)(), r.get[B](bUid)())))
-
   // todo: simplistic implementation => should be replaced with a solution based on graph
   def run[A](r: Register)(deps: Dep*): Register = {
     val uidToDep = deps.foldLeft(Map.empty[String, Dep]) { (acc, d) =>
@@ -31,4 +25,11 @@ object Dep {
         _r
       }
   }
+
+  def unit[A](uid: String)(a: => A): Dep =
+    new Dep(uid, Set.empty)(r => r.put[A](uid, a))
+
+  def map2[A, B, C](uid: String)(aUid: String, bUid: String)(f: (A, B) => C): Dep =
+    new Dep(uid, Set(aUid, bUid))(r => r.put[C](uid, f(r.get[A](aUid)(), r.get[B](bUid)())))
+
 }

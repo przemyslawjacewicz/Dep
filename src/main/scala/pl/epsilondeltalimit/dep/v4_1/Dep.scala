@@ -1,4 +1,4 @@
-package pl.epsilondeltalimit.dep.v4
+package pl.epsilondeltalimit.dep.v4_1
 
 import scala.language.implicitConversions
 
@@ -8,16 +8,7 @@ class Dep[A](val uid: String, val deps: Set[String])(a: Register[A] => Register[
 }
 
 object Dep {
-  import pl.epsilondeltalimit.dep.v4.Once.implicits._
-
-  def unit[A](uid: String)(a: => A): Dep[A] =
-    new Dep[A](uid, Set.empty)(r => r.put(uid, a))
-
-  def map2[A](uid: String)(aUid: String, bUid: String)(f: (A, A) => A): Dep[A] =
-    new Dep[A](uid, Set(aUid, bUid))(r => r.put(uid, f(r.get(aUid)(), r.get(bUid)())))
-
-  def mapN[A](uid: String)(deps: String*)(f: Seq[A] => A): Dep[A] =
-    new Dep[A](uid, deps.toSet)(r => r.put(uid, f(deps.map(dUid => r.get(dUid)()))))
+  import Once.implicits._
 
   // todo: simplistic implementation => should be replaced with a solution based on graph
   def run[A](r: Register[A])(deps: Dep[A]*): Register[A] = {
@@ -35,4 +26,14 @@ object Dep {
         _r
       }
   }
+
+  def unit[A](uid: String)(a: => A): Dep[A] =
+    new Dep[A](uid, Set.empty)(r => r.put(uid, a))
+
+  def map2[A](uid: String)(aUid: String, bUid: String)(f: (A, A) => A): Dep[A] =
+    new Dep[A](uid, Set(aUid, bUid))(r => r.put(uid, f(r.get(aUid)(), r.get(bUid)())))
+
+  def mapN[A](uid: String)(deps: String*)(f: Seq[A] => A): Dep[A] =
+    new Dep[A](uid, deps.toSet)(r => r.put(uid, f(deps.map(dUid => r.get(dUid)()))))
+
 }

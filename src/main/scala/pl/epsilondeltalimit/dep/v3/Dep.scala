@@ -1,12 +1,12 @@
 package pl.epsilondeltalimit.dep.v3
 
+class Dep[A](val id: String, val deps: Set[Dep[_]], a: => A) extends (() => A) {
+  private lazy val value = a
+
+  override def apply(): A = value
+}
+
 object Dep {
-
-  class Dep[A](val id: String, val deps: Set[Dep[_]], a: => A) extends (() => A) {
-    private lazy val value = a
-
-    override def apply(): A = value
-  }
 
 //   todo: simplistic implementation => should be replaced with a solution based on graph
   def run[A](dep: Dep[A]): A = {
@@ -17,7 +17,7 @@ object Dep {
       }
     val deps = loop(Set.empty, dep)
 
-    deps.toSeq.sortBy(_.id).foreach(d => d())
+    deps.toSeq.sortBy(_.id).foreach(_())
 
     dep()
   }

@@ -50,7 +50,4 @@ object Dep extends SparkSessionProvider {
       s(uid)._2()
     }
   }
-
-  def main(args: Array[String]): Unit = {
-  }
 }

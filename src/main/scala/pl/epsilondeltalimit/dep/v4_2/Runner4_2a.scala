@@ -5,7 +5,7 @@ import org.apache.spark.sql.{DataFrame, Row}
 import pl.epsilondeltalimit.SparkSessionProvider
 import pl.epsilondeltalimit.dep.v4_2.Dep._
 
-object Runner4a extends SparkSessionProvider {
+object Runner4_2a extends SparkSessionProvider {
   def main(args: Array[String]): Unit = {
     val d = map2("d")("c", "b")((c: Long, b: DataFrame) => c + b.count())
 
