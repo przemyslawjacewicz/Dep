@@ -1,5 +1,6 @@
 package pl.epsilondeltalimit.dep.v4_1
 
+import pl.epsilondeltalimit.once.Once
 import scala.collection.mutable
 
 trait Register[A] {
@@ -8,6 +9,7 @@ trait Register[A] {
   def get(uid: String): Once[A]
 }
 
+//todo: simplistic implementation
 class SimpleRegister[A] extends Register[A] {
   private val s: mutable.Map[String, Once[A]] = mutable.Map.empty
 

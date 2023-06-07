@@ -1,8 +1,7 @@
 package pl.epsilondeltalimit.dep.v5
 
-import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{DataFrame, Row}
 import pl.epsilondeltalimit.SparkSessionProvider
+import pl.epsilondeltalimit.once.Once
 
 import scala.collection.mutable
 
@@ -14,12 +13,6 @@ object Dep extends SparkSessionProvider {
     def map2(uid: String)(a: String, b: String)(f: (A, A) => A): Register[A]
 
     def get(uid: String): A
-  }
-
-  class Once[A](a: => A) extends (() => A) {
-    private lazy val value = a
-
-    override def apply(): A = value
   }
 
   class SimpleRegister[A] extends Register[A] {

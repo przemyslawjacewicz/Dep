@@ -1,43 +1,49 @@
 package pl.epsilondeltalimit.dep.v4_2
 
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import pl.epsilondeltalimit.SparkSessionProvider
 import pl.epsilondeltalimit.dep.v4_2.Dep._
 
 object Runner4_2a extends SparkSessionProvider {
   def main(args: Array[String]): Unit = {
-    val d = map2("d")("c", "b")((c: Long, b: DataFrame) => c + b.count())
+    val d = map2("d")("c", "b") { (_c: Long, _b: DataFrame) =>
+      println("evaluating d")
+      _c + _b.count()
+    }
 
-    val c = map2("c")("a", "b")((a: DataFrame, b: DataFrame) => a.unionByName(b).count())
+    val c = map2("c")("a", "b") { (_a: DataFrame, _b: DataFrame) =>
+      println("evaluating c")
+      _a.unionByName(_b).count()
+    }
 
-    val b = unit("b") {
+    val b = unit[SparkSession, DataFrame]("b")(spark) { _spark =>
       println("evaluating b")
-      spark.createDataFrame(
-        spark.sparkContext.parallelize(Seq(Row(2, 2L, "b"))),
+      _spark.createDataFrame(
+        _spark.sparkContext.parallelize(Seq(Row(2, 2L, "b"))),
         StructType.fromDDL("f1 INT, f2 LONG, f3 STRING")
       )
     }
-    val a = unit("a") {
+    val a = unit[SparkSession, DataFrame]("a")(spark) { _spark =>
       println("evaluating a")
-      spark.createDataFrame(
-        spark.sparkContext.parallelize(Seq(Row(1, 1L, "a"))),
+      _spark.createDataFrame(
+        _spark.sparkContext.parallelize(Seq(Row(1, 1L, "a"))),
         StructType.fromDDL("f1 INT, f2 LONG, f3 STRING")
       )
     }
 
-    //    c(b(a(new SimpleRegister[DataFrame]))).get("c").show()
+    val r = new SimpleMutableRegister
 
-    run(new SimpleRegister)(a).get[DataFrame]("a")().show()
+    run(r)(a)
+    r.get[DataFrame]("a")().show()
+    r.get[DataFrame]("a")().show()
 
+    run(r)(b)
+    r.get[DataFrame]("b")().show()
 
-    println(
-        run(new SimpleRegister)(c, b, a).get[Long]("c")()
-    )
-
-    println(
-      run(new SimpleRegister)(d, c, b, a).get[Long]("d")()
-    )
+    run(r)(d, c, b, a)
+    r.get[DataFrame]("b")().show()
+    println(r.get[Long]("d")())
 
   }
 }

@@ -1,4 +1,4 @@
-package pl.epsilondeltalimit.dep.v4_1_1
+package pl.epsilondeltalimit.once
 
 import scala.collection.mutable
 import scala.language.implicitConversions
@@ -11,12 +11,5 @@ class Once1[T1, R](r: T1 => R) extends (T1 => R) {
       cached.put(t1, r(t1))
     }
     cached(t1)
-  }
-}
-
-object Once1 {
-  object implicits {
-//    implicit def value2Once[A](a: => A): Once1[A] =
-//      new Once1[A](a)
   }
 }
