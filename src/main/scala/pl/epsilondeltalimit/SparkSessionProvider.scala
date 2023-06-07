@@ -6,7 +6,7 @@ trait SparkSessionProvider {
   implicit lazy val spark: SparkSession = SparkSession.builder
     .appName("Runner")
     .master("local[2]")
-    .config("spark.driver.extraJavaOptions", s"-Dlog4j.configuration=log4j.properties")
+    .config("spark.driver.extraJavaOptions", "-Dlog4j.configuration=log4j2.properties")
     .getOrCreate()
 
 }
