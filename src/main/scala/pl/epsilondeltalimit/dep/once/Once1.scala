@@ -1,4 +1,4 @@
-package pl.epsilondeltalimit.once
+package pl.epsilondeltalimit.dep.once
 
 import scala.collection.mutable
 import scala.language.implicitConversions

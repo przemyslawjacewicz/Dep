@@ -2,10 +2,10 @@ package pl.epsilondeltalimit.dep.v3
 
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.StructType
-import pl.epsilondeltalimit.SparkSessionProvider
+import pl.epsilondeltalimit.dep.SparkSessionProvider
 import pl.epsilondeltalimit.dep.v3.Dep._
 
-object Runner3b extends SparkSessionProvider {
+object Runner2 extends SparkSessionProvider {
   def main(args: Array[String]): Unit = {
     val a = unit("a") {
       println("evaluating a")

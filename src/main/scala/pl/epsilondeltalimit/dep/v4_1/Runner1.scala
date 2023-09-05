@@ -2,13 +2,11 @@ package pl.epsilondeltalimit.dep.v4_1
 
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row}
-import pl.epsilondeltalimit.SparkSessionProvider
-import pl.epsilondeltalimit.dep.v4_1.Dep.{map2, mapN, run, unit}
+import pl.epsilondeltalimit.dep.SparkSessionProvider
+import pl.epsilondeltalimit.dep.v4_1.Dep._
 
-object Runner4_1a extends SparkSessionProvider {
+object Runner1 extends SparkSessionProvider {
   def main(args: Array[String]): Unit = {
-    val d = mapN[DataFrame]("d")("c", "b") { case c :: d :: Nil => c.unionByName(d) }
-
     val c = map2[DataFrame]("c")("a", "b")((a, b) => a.unionByName(b))
 
     val b = unit("b") {
@@ -26,7 +24,7 @@ object Runner4_1a extends SparkSessionProvider {
       )
     }
 
-    run(new SimpleRegister[DataFrame])(d, c, b, a).get("d")().show()
+    run(new SimpleMutableCatalog[DataFrame])(c, b, a).get("c")().show()
 
   }
 }

@@ -2,10 +2,11 @@ package pl.epsilondeltalimit.dep.v4_2
 
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import pl.epsilondeltalimit.SparkSessionProvider
+import pl.epsilondeltalimit.dep.SparkSessionProvider
 import pl.epsilondeltalimit.dep.v4_2.Dep._
 
-object Runner4_2a extends SparkSessionProvider {
+object Runner1 extends SparkSessionProvider {
+
   def main(args: Array[String]): Unit = {
     val d = map2("d")("c", "b") { (_c: Long, _b: DataFrame) =>
       println("evaluating d")
@@ -17,14 +18,16 @@ object Runner4_2a extends SparkSessionProvider {
       _a.unionByName(_b).count()
     }
 
-    val b = unit[SparkSession, DataFrame]("b")(spark) { _spark =>
+    val s = unit[SparkSession]("spark")(spark)
+
+    val b = map[SparkSession, DataFrame]("b")("spark") { _spark =>
       println("evaluating b")
       _spark.createDataFrame(
         _spark.sparkContext.parallelize(Seq(Row(2, 2L, "b"))),
         StructType.fromDDL("f1 INT, f2 LONG, f3 STRING")
       )
     }
-    val a = unit[SparkSession, DataFrame]("a")(spark) { _spark =>
+    val a = map[SparkSession, DataFrame]("a")("spark") { _spark =>
       println("evaluating a")
       _spark.createDataFrame(
         _spark.sparkContext.parallelize(Seq(Row(1, 1L, "a"))),
@@ -32,18 +35,22 @@ object Runner4_2a extends SparkSessionProvider {
       )
     }
 
-    val r = new SimpleMutableRegister
+    val catalog = new SimpleMutableCatalog
 
-    run(r)(a)
-    r.get[DataFrame]("a")().show()
-    r.get[DataFrame]("a")().show()
+    run(catalog)(s)
+    println(catalog.get[SparkSession]("spark")().version)
 
-    run(r)(b)
-    r.get[DataFrame]("b")().show()
+    run(catalog)(a, s)
 
-    run(r)(d, c, b, a)
-    r.get[DataFrame]("b")().show()
-    println(r.get[Long]("d")())
+    catalog.get[DataFrame]("a")().show()
+    catalog.get[DataFrame]("a")().show()
+
+    run(catalog)(b, s)
+    catalog.get[DataFrame]("b")().show()
+
+    run(catalog)(d, c, b, a, s)
+    catalog.get[DataFrame]("b")().show()
+    println(catalog.get[Long]("d")())
 
   }
 }

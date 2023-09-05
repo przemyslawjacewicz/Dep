@@ -1,9 +1,9 @@
-package pl.epsilondeltalimit.dep.design
+package pl.epsilondeltalimit.dep.v1
 
 import org.apache.spark.sql.DataFrame
 
 // big goal: implement a structure that will allow to code computations with dependencies
-object DepDesign_v1 {
+object Dep {
 
   // represents a resource of type A that is dependent on other resources
   // example: a dataframe that is dependent on other dataframes i.e. to get this dataframe we need to join/union between
@@ -12,18 +12,18 @@ object DepDesign_v1 {
 
   object Dep {
 
-    //register = a container of resources with dependency information
+    // catalog = a container of all resources with dependency information
 
-    // commits a resource without dependencies into the register with an id
-    // need to access register
-    // should probably return the register with committed resource
+    // commits a resource without dependencies into the catalog with an id
+    // need to access catalog
+    // should probably return the new catalog with committed resource
     // should the resource be lazy ?
     def commit[A](a: A, id: String): Unit =
       ???
 
-    // checkouts a resource from register
-    // need to access register
-    // should probably return the register
+    // checkouts a resource from catalog
+    // need to access catalog
+    // should probably return the catalog
     def checkout[A](id: String): A =
       ???
   }

@@ -3,12 +3,12 @@ package pl.epsilondeltalimit.dep.v3
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.StructType
-import pl.epsilondeltalimit.SparkSessionProvider
+import pl.epsilondeltalimit.dep.SparkSessionProvider
 import pl.epsilondeltalimit.dep.v3.Dep._
 
 import scala.util.Random
 
-object Runner3a extends SparkSessionProvider {
+object Runner1 extends SparkSessionProvider {
   def main(args: Array[String]): Unit = {
     val aPath = new Path("/", new Path("tmp", new Random().nextString(10))).toString
     println(s"aPath=$aPath")

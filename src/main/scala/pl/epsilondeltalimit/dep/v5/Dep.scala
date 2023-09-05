@@ -1,7 +1,7 @@
 package pl.epsilondeltalimit.dep.v5
 
-import pl.epsilondeltalimit.SparkSessionProvider
-import pl.epsilondeltalimit.once.Once
+import pl.epsilondeltalimit.dep.SparkSessionProvider
+import pl.epsilondeltalimit.dep.once.Once
 
 import scala.collection.mutable
 

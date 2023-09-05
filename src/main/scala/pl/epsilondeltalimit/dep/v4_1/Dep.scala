@@ -1,37 +1,36 @@
 package pl.epsilondeltalimit.dep.v4_1
 
-import pl.epsilondeltalimit.once.Once
+import pl.epsilondeltalimit.dep._
 
 import scala.language.implicitConversions
 
-class Dep[A](val uid: String, val deps: Set[String])(a: Register[A] => Register[A])
-    extends (Register[A] => Register[A]) {
-  override def apply(r: Register[A]): Register[A] = a(r)
+class Dep[A](val id: String, val deps: Set[String])(a: Catalog[A] => Catalog[A]) extends (Catalog[A] => Catalog[A]) {
+  override def apply(c: Catalog[A]): Catalog[A] = a(c)
 }
 
 object Dep {
-  import Once.implicits._
+  import once.Once.implicits._
 
-  def unit[A](uid: String)(a: => A): Dep[A] =
-    new Dep[A](uid, Set.empty)(r => r.put(uid, a))
+  def unit[A](id: String)(a: A): Dep[A] =
+    new Dep[A](id, Set.empty)(c => c.put(id, a))
 
-  def map2[A](uid: String)(aUid: String, bUid: String)(f: (A, A) => A): Dep[A] =
-    new Dep[A](uid, Set(aUid, bUid))(r => r.put(uid, f(r.get(aUid)(), r.get(bUid)())))
+  def map2[A](id: String)(a: String, b: String)(f: (A, A) => A): Dep[A] =
+    new Dep[A](id, Set(a, b))(c => c.put(id, f(c.get(a)(), c.get(b)())))
 
-  def mapN[A](uid: String)(deps: String*)(f: Seq[A] => A): Dep[A] =
-    new Dep[A](uid, deps.toSet)(r => r.put(uid, f(deps.map(dUid => r.get(dUid)()))))
+//  def mapN[A](id: String)(deps: String*)(f: Seq[A] => A): Dep[A] =
+//    new Dep[A](id, deps.toSet)(c => c.put(id, f(deps.map(dId => c.get(dId)()))))
 
   // todo: simplistic implementation => should be replaced with a solution based on graph
-  def run[A](r: Register[A])(deps: Dep[A]*): Register[A] = {
+  def run[A](c: Catalog[A])(deps: Dep[A]*): Catalog[A] = {
     val uidToDep = deps.foldLeft(Map.empty[String, Dep[A]]) { (acc, d) =>
-      acc + (d.uid -> d)
+      acc + (d.id -> d)
     }
     val uidToDeps = deps.foldLeft(Map.empty[String, Set[String]]) { (acc, d) =>
-      acc + (d.uid -> d.deps)
+      acc + (d.id -> d.deps)
     }
 
     (uidToDeps.keys ++ uidToDeps.values.flatten).toSeq.sorted
-      .foldLeft(r) { (acc, uid) =>
+      .foldLeft(c) { (acc, uid) =>
         val _r = uidToDep(uid)(acc)
         _r.get(uid)()
         _r

@@ -1,4 +1,4 @@
-package pl.epsilondeltalimit.once
+package pl.epsilondeltalimit.dep.once
 
 import scala.language.implicitConversions
 
@@ -10,7 +10,7 @@ class Once[A](a: => A) extends (() => A) {
 
 object Once {
   object implicits {
-    implicit def value2Once[A](a: => A): Once[A] =
+    implicit def value2Once[A](a: A): Once[A] =
       new Once[A](a)
   }
 }
