@@ -8,7 +8,7 @@ object Dep {
   // represents a resource of type A that is dependent on other resources
   // example: a dataframe that is dependent on other dataframes i.e. to get this dataframe we need to join/union between
   // dependant dataframes
-  trait Dep[A]
+  type Dep[A]
 
   object Dep {
 

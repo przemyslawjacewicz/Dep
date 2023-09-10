@@ -1,46 +1,10 @@
 package pl.epsilondeltalimit.dep.v5
 
-import pl.epsilondeltalimit.dep.SparkSessionProvider
-import pl.epsilondeltalimit.dep.once.Once
+import org.apache.spark.sql.DataFrame
 
-import scala.collection.mutable
+class Dep(val id: String, val deps: Set[String])(v: => DataFrame) extends (() => DataFrame) {
+  private lazy val value = v
 
-object Dep extends SparkSessionProvider {
-
-  trait Register[A] {
-    def unit(uid: String)(a: => A): Register[A]
-
-    def map2(uid: String)(a: String, b: String)(f: (A, A) => A): Register[A]
-
-    def get(uid: String): A
-  }
-
-  class SimpleRegister[A] extends Register[A] {
-    private val s: mutable.Map[String, (Set[String], Once[A])] = mutable.Map.empty
-
-    override def unit(uid: String)(a: => A): Register[A] = {
-      s += (uid -> (Set.empty, new Once(a)))
-      this
-    }
-
-    override def map2(uid: String)(a: String, b: String)(f: (A, A) => A): Register[A] = {
-      s += (uid -> (Set(a, b), new Once(f(s(a)._2(), s(b)._2()))))
-      this
-    }
-
-    //   todo: simplistic implementation => should be replaced with a solution based on graph
-    override def get(uid: String): A = {
-      def loop(deps: Set[String], dep: String): Set[String] =
-        s(dep)._1 match {
-          case ds if ds.isEmpty => deps
-          case ds               => ds.flatMap(d => loop(deps ++ ds, d))
-        }
-
-      val deps = loop(Set.empty, uid)
-
-      deps.toSeq.sorted.foreach(d => s(d)._2())
-
-      s(uid)._2()
-    }
-  }
+  override def apply(): DataFrame =
+    value
 }
