@@ -35,7 +35,7 @@ class Catalog {
   }
 
   def eval[A](id: String): A = {
-    deps(id).foreach(_depsId => _depsId.par.foreach(_depId => get(_depId)()))
+    deps(id).foreach(_depsId => _depsId.par.foreach(_depId => byId(_depId)()))
     get[A](id)()
   }
 }
