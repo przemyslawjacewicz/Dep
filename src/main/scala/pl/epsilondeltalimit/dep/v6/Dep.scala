@@ -13,10 +13,17 @@ class Dep(val id: String, val deps: () => Set[String])(value: () => DataFrame) e
 }
 
 //todo: add smart constructors
-//object Dep {
+object Dep {
 //  def dep(id: String, deps: Set[String])(value: => DataFrame): Dep =
 //    new Dep(id, () => deps)(() => value)
-//
+
 //  def dep(id: String, deps: () => Set[String])(value: () => DataFrame): Dep =
 //    new Dep(id, deps)(value)
-//}
+
+  def map2(id: String)(a: Dep, b: Dep)(f: (DataFrame, DataFrame) => DataFrame): Dep =
+    new Dep(id, () => Set(a.id, b.id))(() => f(a(), b()))
+
+  def mapN(id: String)(deps: Dep*)(f: Seq[DataFrame] => DataFrame): Dep =
+    new Dep(id, () => deps.flatMap(_.deps()).toSet)(() => f(deps.map(_())))
+
+}

@@ -1,11 +1,12 @@
-package pl.epsilondeltalimit.dep.v6
+package pl.epsilondeltalimit.dep.v6.transformation
 
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.StructType
+import pl.epsilondeltalimit.dep.v6.{Catalog, Transformation}
 
 object TransformationA extends Transformation {
-  override def apply(c: Catalog): Catalog =
-    c.unit(
+  override def apply(catalog: Catalog): Catalog =
+    catalog.unit(
       "a", {
         println("evaluating a")
         spark.createDataFrame(
