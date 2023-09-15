@@ -49,17 +49,17 @@ object Dep {
       ???
 
     // forces evaluation of all resources, should take care of the dependencies
-    def run[A](r: Catalog)(d: Dep[A]): A =
+    def run[A](c: Catalog)(d: Dep[A]): A =
       ???
   }
 
-  def processBlocking(r: Catalog)(id1: String, id2: String): DataFrame = {
-    val df1 = Dep.run(r)(Dep.checkout[DataFrame](id1)) // has no dependencies -> can be checked directly
-    val df2 = Dep.run(r)(Dep.checkout[DataFrame](id2)) // has no dependencies -> can be checked directly
+  def processBlocking(c: Catalog)(id1: String, id2: String): DataFrame = {
+    val df1 = Dep.run(c)(Dep.checkout[DataFrame](id1)) // has no dependencies -> can be checked directly
+    val df2 = Dep.run(c)(Dep.checkout[DataFrame](id2)) // has no dependencies -> can be checked directly
     df1.unionByName(df2)
   }
 
-  def process(r: Catalog)(id1: String, id2: String): DataFrame = {
+  def process(c: Catalog)(id1: String, id2: String): DataFrame = {
     val dep1 = Dep.checkout[DataFrame](id1)
     val dep2 = Dep.checkout[DataFrame](id2)
 
@@ -67,7 +67,7 @@ object Dep {
 
     Dep.commit(dep, "dep", id1, id2)
 
-    Dep.run(r)(Dep.checkout("dep"))
+    Dep.run(c)(Dep.checkout("dep"))
   }
 
 }
