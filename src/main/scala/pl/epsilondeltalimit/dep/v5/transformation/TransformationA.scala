@@ -1,7 +1,8 @@
-package pl.epsilondeltalimit.dep.v5
+package pl.epsilondeltalimit.dep.v5.transformation
 
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.StructType
+import pl.epsilondeltalimit.dep.v5.{Catalog, Dep, Transformation}
 
 object TransformationA extends Transformation {
   override def apply(c: Catalog): Catalog =

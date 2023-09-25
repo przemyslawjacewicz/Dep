@@ -5,7 +5,7 @@ import pl.epsilondeltalimit.dep.v6_1.transformation.{TransformationA, Transforma
 
 object Runner1 {
   def main(args: Array[String]): Unit = {
-    val transformations: Set[Transformation[_]] =
+    val transformations: Set[Transformation] =
       Set(TransformationA, TransformationZ)
 
     val catalog: Catalog = transformations.foldLeft(new Catalog)((_c, _t) => _t(_c))

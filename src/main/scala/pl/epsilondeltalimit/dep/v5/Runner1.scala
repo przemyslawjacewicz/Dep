@@ -1,5 +1,7 @@
 package pl.epsilondeltalimit.dep.v5
 
+import pl.epsilondeltalimit.dep.v5.transformation.{TransformationA, TransformationB, TransformationC}
+
 object Runner1 {
   def main(args: Array[String]): Unit = {
     val transformations: Set[Transformation] = Set(TransformationC, TransformationB, TransformationA)

@@ -14,8 +14,8 @@ class Catalog {
   private def deps(id: String): Seq[Set[String]] = {
     @tailrec
     def go(_deps: Set[Dep], _stages: Seq[Set[String]]): Seq[Set[String]] = {
-      val _depsId = _deps.flatMap(_.deps())
-      if (_depsId.isEmpty) _stages else go(_depsId.map(byId), _depsId +: _stages)
+      val _depsIds = _deps.flatMap(_.deps())
+      if (_depsIds.isEmpty) _stages else go(_depsIds.map(byId), _depsIds +: _stages)
     }
 
     go(Set(byId(id)), Seq(Set(id))).reverse
@@ -35,7 +35,7 @@ class Catalog {
   }
 
   def eval(id: String): DataFrame = {
-    deps(id).foreach(_depsId => _depsId.par.foreach(_depId => get(_depId)()))
+    deps(id).foreach(_depsIds => _depsIds.par.foreach(_depId => get(_depId)()))
     get(id)()
   }
 }

@@ -1,10 +1,10 @@
 package pl.epsilondeltalimit.dep.v6_1.transformation
 
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.{Row, SparkSession}
 import pl.epsilondeltalimit.dep.v6_1.{Catalog, Transformation}
 
-object TransformationA extends Transformation[DataFrame] {
+object TransformationA extends Transformation {
   override def apply(catalog: Catalog): Catalog = {
     val spark = catalog.get[SparkSession]("spark")
 

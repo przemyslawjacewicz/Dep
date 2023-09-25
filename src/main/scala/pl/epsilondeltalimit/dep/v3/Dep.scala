@@ -1,7 +1,7 @@
 package pl.epsilondeltalimit.dep.v3
 
 // this implementation forces all dependency references to be available e.g. 'a' and 'b' need to be available to
-// calculate 'c'
+// add/implement 'c'
 class Dep[A](val id: String, val deps: Set[Dep[_]], a: => A) extends (() => A) {
   private lazy val value = a
 

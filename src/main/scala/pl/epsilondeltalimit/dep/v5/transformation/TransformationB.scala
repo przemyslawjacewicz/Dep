@@ -1,4 +1,6 @@
-package pl.epsilondeltalimit.dep.v5
+package pl.epsilondeltalimit.dep.v5.transformation
+
+import pl.epsilondeltalimit.dep.v5.{Catalog, Transformation}
 
 object TransformationB extends Transformation {
   override def apply(c: Catalog): Catalog =
