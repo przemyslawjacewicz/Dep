@@ -5,5 +5,5 @@ import pl.epsilondeltalimit.dep.v6_1.{Catalog, Transformation}
 
 object TransformationZ extends Transformation with SparkSessionProvider {
   override def apply(catalog: Catalog): Catalog =
-    catalog.unit("spark", spark)
+    catalog.unit("spark")(spark)
 }

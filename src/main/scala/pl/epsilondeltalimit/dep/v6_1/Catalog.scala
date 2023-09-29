@@ -19,7 +19,7 @@ class Catalog {
     go(Set(byId(id)), Seq(Set(id))).reverse
   }
 
-  def unit[A](id: String, value: => A): Catalog = {
+  def unit[A](id: String)(value: => A): Catalog = {
     s += new Dep[A](id, () => Set.empty[String])(() => value)
     this
   }
