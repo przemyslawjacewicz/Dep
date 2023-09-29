@@ -2,5 +2,5 @@
 target/**
 *.iml
 */*.iml
-project/**
+**/target/**
 .bsp/**
