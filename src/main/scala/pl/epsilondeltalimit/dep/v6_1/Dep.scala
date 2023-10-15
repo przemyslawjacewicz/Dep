@@ -1,6 +1,6 @@
 package pl.epsilondeltalimit.dep.v6_1
 
-class Dep[A](val id: String, val deps: () => Set[String])(value: () => A) extends (() => A) {
+class Dep[A](val id: String, val needs: () => Set[String])(value: () => A) extends (() => A) {
   private lazy val cached = value()
   private lazy val isDerived = id.endsWith("_M") || id.endsWith("_F")
 

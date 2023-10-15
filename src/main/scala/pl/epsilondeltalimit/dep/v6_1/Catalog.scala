@@ -12,7 +12,7 @@ class Catalog {
   private def deps(id: String): Seq[Set[String]] = {
     @tailrec
     def go(_deps: Set[Dep[_]], _stages: Seq[Set[String]]): Seq[Set[String]] = {
-      val _depsIds = _deps.flatMap(_.deps())
+      val _depsIds = _deps.flatMap(_.needs())
       if (_depsIds.isEmpty) _stages else go(_depsIds.map(byId), _depsIds +: _stages)
     }
 
@@ -26,7 +26,7 @@ class Catalog {
 
   def get[A](id: String): Dep[A] =
     byId
-      .getOrElse(id, new Dep[A](id, () => byId(id).deps())(() => byId(id).asInstanceOf[Dep[A]]()))
+      .getOrElse(id, new Dep[A](id, () => byId(id).needs())(() => byId(id).asInstanceOf[Dep[A]]()))
       .asInstanceOf[Dep[A]]
 
   def put[A](dep: Dep[A]): Catalog = {
