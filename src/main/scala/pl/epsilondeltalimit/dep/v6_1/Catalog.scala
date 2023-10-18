@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 
 class Catalog {
-  private val s: mutable.Set[Dep[_]] = mutable.Set.empty
+  /*private*/ val s: mutable.Set[Dep[_]] = mutable.Set.empty //todo: temporary, for debugging
 
   private def byId: Map[String, Dep[_]] =
     s.map(_dep => _dep.id -> _dep).toMap
