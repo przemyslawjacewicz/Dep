@@ -74,8 +74,8 @@ object Common {
     private val sparkVersion = "3.2.1"
 
     lazy val spark = Seq(
-      sparkOrg %% "spark-sql" % sparkVersion,
       sparkOrg %% "spark-core" % sparkVersion,
+      sparkOrg %% "spark-sql" % sparkVersion,
       sparkOrg %% "spark-catalyst" % sparkVersion
     )
 
@@ -94,7 +94,8 @@ object Common {
     )
 
     lazy val scalaTest = Seq(
-      "org.scalatest" %% "scalatest" % "3.2.9"
+      "org.scalactic" %% "scalactic" % "3.2.15",
+      "org.scalatest" %% "scalatest" % "3.2.15"
     )
 
     lazy val scalaMock = Seq(

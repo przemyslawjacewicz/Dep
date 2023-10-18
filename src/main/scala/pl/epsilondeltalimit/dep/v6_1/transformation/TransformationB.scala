@@ -7,12 +7,13 @@ import pl.epsilondeltalimit.dep.v6_1.{Catalog, Transformation}
 object TransformationB extends Transformation {
   override def apply(catalog: Catalog): Catalog =
     catalog.put(
-      catalog.get[SparkSession]("spark").map("c") { spark =>
+      catalog.get[SparkSession]("spark").map{ spark =>
         spark.createDataFrame(
           spark.sparkContext.parallelize(Seq(Row(1, 1L, "1"), Row(1, 1L, "1"), Row(2, 2L, "2"))),
           StructType.fromDDL("f1 INT, f2 LONG, f3 STRING")
         )
       }
+        .as("b")
     )
 
 }

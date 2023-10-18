@@ -23,11 +23,3 @@ lazy val root = (project in file("."))
   .settings(
     Test / packageBin / publishArtifact := true,
   )
-
-//libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.15"
-//libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test"
-//
-//libraryDependencies += "org.apache.spark" %% "spark-core" % "3.3.2"
-//libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.3.2"
-//libraryDependencies += "org.apache.hadoop" % "hadoop-hdfs" % "3.3.2"
-

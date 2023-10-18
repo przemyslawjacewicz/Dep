@@ -4,16 +4,16 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 
 class Catalog {
-  /*private*/ val s: mutable.Set[Dep[_]] = mutable.Set.empty //todo: temporary, for debugging
+  private val s: mutable.Set[Dep[_]] = mutable.Set.empty
 
   private def byId: Map[String, Dep[_]] =
-    s.map(_dep => _dep.id -> _dep).toMap
+    s.map(dep => dep.id -> dep).toMap
 
-  private def deps(id: String): Seq[Set[String]] = {
+  private def stages(id: String): Seq[Set[String]] = {
     @tailrec
-    def go(_deps: Set[Dep[_]], _stages: Seq[Set[String]]): Seq[Set[String]] = {
-      val _depsIds = _deps.flatMap(_.needs())
-      if (_depsIds.isEmpty) _stages else go(_depsIds.map(byId), _depsIds +: _stages)
+    def go(deps: Set[Dep[_]], acc: Seq[Set[String]]): Seq[Set[String]] = {
+      val needs = deps.flatMap(_.needs())
+      if (needs.isEmpty) acc else go(needs.map(byId), needs +: acc)
     }
 
     go(Set(byId(id)), Seq(Set(id))).reverse
@@ -29,13 +29,17 @@ class Catalog {
       .getOrElse(id, new Dep[A](id, () => byId(id).needs())(() => byId(id).asInstanceOf[Dep[A]]()))
       .asInstanceOf[Dep[A]]
 
+  def getAll: Set[Dep[_]] =
+    s.toSet
+
   def put[A](dep: Dep[A]): Catalog = {
+    require(!dep.id.endsWith("_M") && !dep.id.endsWith("_F"), "cannot put intermediate Dep")
     s += dep
     this
   }
 
   def eval[A](id: String): A = {
-    deps(id).foreach(_depsIds => _depsIds.par.foreach(_depId => byId(_depId)()))
+    stages(id).foreach(_.par.foreach(byId(_)()))
     get[A](id)()
   }
 }
