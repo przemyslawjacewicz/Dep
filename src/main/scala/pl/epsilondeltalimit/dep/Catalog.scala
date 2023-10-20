@@ -16,7 +16,7 @@ class Catalog {
       if (needs.isEmpty) acc else go(needs.map(byId), needs +: acc)
     }
 
-    go(Set(byId(id)), Seq(Set(id)))//.reverse
+    go(Set(byId(id)), Seq(Set(id))).reverse
   }
 
   def unit[A](id: String)(value: => A): Catalog = {
@@ -33,7 +33,7 @@ class Catalog {
     s.toSet
 
   def put[A](dep: Dep[A]): Catalog = {
-    require(!dep.id.endsWith("_M") && !dep.id.endsWith("_F"), "cannot put intermediate Dep")
+    //    require(!dep.id.endsWith("_M") && !dep.id.endsWith("_F"), "cannot put intermediate Dep")
     s += dep
     this
   }
@@ -46,7 +46,10 @@ class Catalog {
   //todo: evalAll ?
 
   //todo: consider a lib create a graph
-  def explain(id: String): Unit = {
-    println(stages(id).map(_.mkString(",")).mkString("\n"))
-  }
+  def explain(id: String): Seq[Set[String]] =
+    stages(id)
+
+  def show(id: String): Unit =
+    explain(id).map(_.mkString(",")).mkString("\n")
+
 }
