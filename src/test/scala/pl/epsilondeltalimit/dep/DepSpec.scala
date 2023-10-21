@@ -3,8 +3,33 @@ package pl.epsilondeltalimit.dep
 import org.scalatest.Assertion
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import pl.epsilondeltalimit.dep.Transformations.Transformation
+
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration
+import scala.concurrent.duration.Duration
 
 class DepSpec extends AnyFlatSpec with Matchers {
+
+  behavior of "apply"
+
+  it should "cache the result" in {
+
+    def time(block: => Unit): Long = {
+      val start = System.nanoTime()
+      block
+      val end = System.nanoTime()
+      end - start
+    }
+
+    val dep = new Dep[Unit]("dep", () => Set.empty[String])(() => {
+      TimeUnit.SECONDS.sleep(1)
+      ()
+    })
+
+    time(dep()) should be > Duration(1, duration.SECONDS).toNanos
+    time(dep()) should be < Duration(1, duration.SECONDS).toNanos
+  }
 
   behavior of "map"
 
@@ -15,7 +40,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").map(_ + 1)),
-        u,
+        u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("u_M")
@@ -25,7 +50,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").map(_ + 1).as("t")),
-        u,
+        u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("t")
@@ -35,7 +60,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").map(_ + 1).map(_ + 1)),
-        u,
+        u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("u_M_M")
@@ -45,7 +70,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").map(_ + 1).map(_ + 1).as("t")),
-        u,
+        u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("t")
@@ -60,7 +85,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2"))),
         _.unit("u2")(2),
-        u,
+        u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("u_F")
@@ -71,7 +96,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2")).as("t")),
         _.unit("u2")(2),
-        u,
+        u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("t")
@@ -83,7 +108,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2")).flatMap(_ => c.get[Int]("u3"))),
         _.unit("u3")(3),
         _.unit("u2")(2),
-        u,
+        u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("u_F_F")
@@ -95,7 +120,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2")).flatMap(_ => c.get[Int]("u3")).as("t")),
         _.unit("u3")(3),
         _.unit("u2")(2),
-        u,
+        u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("t")
@@ -106,7 +131,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(u => c.get[Int]("u2").map(u2 => u + u2))),
         _.unit("u2")(2),
-        u,
+        u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("u_F")
@@ -117,7 +142,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(u => c.get[Int]("u2").map(u2 => u + u2)).as("t")),
         _.unit("u2")(2),
-        u,
+        u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("t")
@@ -131,7 +156,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
       Set[Transformation](
         (c: Catalog) => c.put(Dep.map2("c")(c.get[Int]("a"), c.get[Int]("b"))(_ + _)),
         _.unit("b")(2),
-        _.unit("a")(1),
+        _.unit("a")(1)
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("c")

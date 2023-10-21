@@ -1,5 +1,7 @@
 package pl.epsilondeltalimit.dep
 
+import pl.epsilondeltalimit.dep.Transformations.{MultiPutTransformation, PutTransformation, Transformation}
+
 import scala.annotation.tailrec
 import scala.collection.mutable
 
@@ -29,6 +31,7 @@ class Catalog {
       .getOrElse(id, new Dep[A](id, () => byId(id).needs())(() => byId(id).asInstanceOf[Dep[A]]()))
       .asInstanceOf[Dep[A]]
 
+  // todo: consider removing
   def getAll: Set[Dep[_]] =
     s.toSet
 
@@ -43,13 +46,21 @@ class Catalog {
     get[A](id)()
   }
 
-  //todo: evalAll ?
+  // todo: evalAll ?
 
-  //todo: consider a lib create a graph
+  // todo: consider a lib create a graph
   def explain(id: String): Seq[Set[String]] =
     stages(id)
 
   def show(id: String): Unit =
-    explain(id).map(_.mkString(",")).mkString("\n")
+    println(explain(id).map(_.mkString(",")).mkString("\n"))
 
+  def withTransformations(ts: Transformation*): Catalog =
+    ts.foldLeft(this)((c, t) => t(c))
+
+  def withPutTransformations(pts: PutTransformation*): Catalog =
+    pts.foldLeft(this)((c, pt) => c.put(pt(c)))
+
+  def withMultiPutTransformations(mpts: MultiPutTransformation*): Catalog =
+    mpts.foldLeft(this)((c, mpt) => mpt(c).foldLeft(c)(_.put(_)))
 }

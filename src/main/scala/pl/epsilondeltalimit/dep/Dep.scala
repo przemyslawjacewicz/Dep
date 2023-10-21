@@ -1,6 +1,6 @@
 package pl.epsilondeltalimit.dep
 
-//todo: make constructor private
+//todo: make constructor private ?
 class Dep[A](val id: String, val needs: () => Set[String])(value: () => A) extends (() => A) {
   private lazy val cached = value()
 
