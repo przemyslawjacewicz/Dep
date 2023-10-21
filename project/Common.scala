@@ -9,11 +9,11 @@ object Common {
   val projectOrganization = "pl.epsilondeltalimit"
 
   val assemblyConf = Seq(
-    assembly / test := {},
+    assembly / test           := {},
     assembly / assemblyOption := (assembly / assemblyOption).value.copy(includeScala = false),
     assembly / assemblyMergeStrategy := {
-      case PathList("META-INF", xs@_*) => MergeStrategy.discard
-      case x: Any => MergeStrategy.first
+      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+      case x: Any                        => MergeStrategy.first
     }
   )
 
@@ -24,25 +24,25 @@ object Common {
    * @return basic settings for a module with provided version
    */
   def settings(projectVersion: ProjectVersion) = Seq(
-    organization := projectOrganization,
-    scalaVersion := projectScalaVersion,
+    organization            := projectOrganization,
+    scalaVersion            := projectScalaVersion,
     ThisBuild / useCoursier := false, // Disabling coursier fixes the problem with java.lang.NoClassDefFoundError: scala/xml while
     // publishing child modules: https://github.com/sbt/sbt/issues/4995
 
-    run / fork := true,
+    run / fork               := true,
     Test / parallelExecution := false,
-    Test / fork := false,
+    Test / fork              := false,
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oD"),
     javaOptions ++= Seq("-Dlog4j.debug=true", "-Dlog4j.configuration=log4j.properties"),
     outputStrategy := Some(StdoutOutput),
-    isSnapshot := projectVersion.snapshot,
-    version := projectVersion.fullVersion,
+    isSnapshot     := projectVersion.snapshot,
+    version        := projectVersion.fullVersion,
     resolvers += DefaultMavenRepository,
     resolvers += Resolver.mavenLocal
   ) ++ {
     if (projectVersion.snapshot)
       Seq(
-        assembly / test := ((): Unit),
+        assembly / test      := ((): Unit),
         publishConfiguration := publishConfiguration.value.withOverwrite(true)
       )
     else
@@ -71,17 +71,17 @@ object Common {
     }
 
     private val sparkOrg: String = "org.apache.spark"
-    private val sparkVersion = "3.2.1"
+    private val sparkVersion     = "3.2.1"
 
     lazy val spark = Seq(
-      sparkOrg %% "spark-core" % sparkVersion,
-      sparkOrg %% "spark-sql" % sparkVersion,
+      sparkOrg %% "spark-core"     % sparkVersion,
+      sparkOrg %% "spark-sql"      % sparkVersion,
       sparkOrg %% "spark-catalyst" % sparkVersion
     )
 
     lazy val sparkTests = Seq(
-      sparkOrg %% "spark-sql" % sparkVersion classifier "tests",
-      sparkOrg %% "spark-core" % sparkVersion classifier "tests",
+      sparkOrg %% "spark-sql"      % sparkVersion classifier "tests",
+      sparkOrg %% "spark-core"     % sparkVersion classifier "tests",
       sparkOrg %% "spark-catalyst" % sparkVersion classifier "tests"
     )
 
@@ -102,16 +102,9 @@ object Common {
       "org.scalamock" %% "scalamock" % "5.2.0"
     )
 
-    lazy val dbutils = Seq(
-      "com.databricks" %% "dbutils-api" % "0.0.5"
-    )
-
     lazy val pureConfig = Seq(
       "com.github.pureconfig" %% "pureconfig" % "0.17.1"
     )
 
-    lazy val reflections = Seq(
-      "org.reflections" % "reflections" % "0.10.2"
-    )
   }
 }
