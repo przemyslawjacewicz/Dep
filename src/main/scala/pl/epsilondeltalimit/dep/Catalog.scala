@@ -41,6 +41,15 @@ class Catalog {
     this
   }
 
+  def withTransformations(ts: Transformation*): Catalog =
+    ts.foldLeft(this)((c, t) => t(c))
+
+  def withPutTransformations(pts: PutTransformation*): Catalog =
+    pts.foldLeft(this)((c, pt) => c.put(pt(c)))
+
+  def withMultiPutTransformations(mpts: MultiPutTransformation*): Catalog =
+    mpts.foldLeft(this)((c, mpt) => mpt(c).foldLeft(c)(_.put(_)))
+
   def eval[A](id: String): A = {
     stages(id).foreach(_.par.foreach(byId(_)()))
     get[A](id)()
@@ -53,14 +62,6 @@ class Catalog {
     stages(id)
 
   def show(id: String): Unit =
-    println(explain(id).map(_.mkString(",")).mkString("\n"))
+    println(explain(id).reverse.zipWithIndex.reverse.map { case (s, i) => s"$i: ${s.mkString(",")}" }.mkString("\n"))
 
-  def withTransformations(ts: Transformation*): Catalog =
-    ts.foldLeft(this)((c, t) => t(c))
-
-  def withPutTransformations(pts: PutTransformation*): Catalog =
-    pts.foldLeft(this)((c, pt) => c.put(pt(c)))
-
-  def withMultiPutTransformations(mpts: MultiPutTransformation*): Catalog =
-    mpts.foldLeft(this)((c, mpt) => mpt(c).foldLeft(c)(_.put(_)))
 }
