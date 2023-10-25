@@ -1,6 +1,6 @@
 package pl.epsilondeltalimit.dep
 
-import pl.epsilondeltalimit.dep.Transformations.{MultiPutTransformation, PutTransformation, Transformation}
+import pl.epsilondeltalimit.dep.Transformations._
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -31,7 +31,7 @@ class Catalog {
       .getOrElse(id, new Dep[A](id, () => byId(id).needs())(() => byId(id).asInstanceOf[Dep[A]]()))
       .asInstanceOf[Dep[A]]
 
-  // todo: consider removing
+  // todo: consider removing this
   def getAll: Set[Dep[_]] =
     s.toSet
 
@@ -41,14 +41,17 @@ class Catalog {
     this
   }
 
-  def withTransformations(ts: Transformation*): Catalog =
-    ts.foldLeft(this)((c, t) => t(c))
-
-  def withPutTransformations(pts: PutTransformation*): Catalog =
-    pts.foldLeft(this)((c, pt) => c.put(pt(c)))
-
-  def withMultiPutTransformations(mpts: MultiPutTransformation*): Catalog =
-    mpts.foldLeft(this)((c, mpt) => mpt(c).foldLeft(c)(_.put(_)))
+  def withTransformations[T](ts: T*)(implicit wrapper: Seq[T] => Wrapped[T]): Catalog =
+    wrapper(ts) match {
+      case Transformations.Transformations(xs) =>
+        xs.foldLeft(this)((c, t) => t(c))
+      case Transformations.PutTransformations(xs) =>
+        xs.foldLeft(this)((c, pt) => c.put(pt(c)))
+      case Transformations.PutTransformationsWithImplicitCatalog(xs) =>
+        xs.foldLeft(this)((c, pt) => c.put(pt(c)))
+      case Transformations.MultiPutTransformations(xs) =>
+        xs.foldLeft(this)((c, mpt) => mpt(c).foldLeft(c)(_.put(_)))
+    }
 
   def eval[A](id: String): A = {
     stages(id).foreach(_.par.foreach(byId(_)()))

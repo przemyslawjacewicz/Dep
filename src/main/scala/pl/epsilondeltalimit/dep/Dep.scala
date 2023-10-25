@@ -10,13 +10,16 @@ class Dep[A](val id: String, val needs: () => Set[String])(value: () => A) exten
   def map[B](f: A => B): Dep[B] =
     new Dep[B](s"${id}_M", () => (Set(this.id) ++ this.needs()).filterNot(isDerived))(() => f(apply()))
 
+  def map2[B, C](b: Dep[B])(f: (A, B) => C): Dep[C] =
+    new Dep[C](s"${id}_M2", () => Set(id, b.id))(() => f(apply(), b()))
+
   def flatMap[B](f: A => Dep[B]): Dep[B] = {
     new Dep[B](s"${id}_F", () => (Set(this.id, f(apply()).id) ++ this.needs() ++ f(apply()).needs()).filterNot(isDerived))(() => f(apply()).apply())
   }
 
   //todo: consider a better way of marking a Dep as derived/intermediate
   private def isDerived(id: String): Boolean =
-    id.endsWith("_M") || id.endsWith("_F")
+    id.endsWith("_M") || id.endsWith("_F") || id.endsWith("_M2")
 
   def as(id: String): Dep[A] =
     new Dep[A](id, () => needs())(() => apply())
@@ -24,7 +27,14 @@ class Dep[A](val id: String, val needs: () => Set[String])(value: () => A) exten
 }
 
 object Dep {
-  def map2[A, B, C](id: String)(a: Dep[A], b: Dep[B])(f: (A, B) => C): Dep[C] =
-    new Dep[C](id, () => Set(a.id, b.id))(() => f(a(), b()))
 
+  object implicits {
+
+    implicit class StringImplicits(id: String) {
+      def as[A](implicit c: Catalog): Dep[A] =
+        c.get[A](id)
+
+    }
+
+  }
 }

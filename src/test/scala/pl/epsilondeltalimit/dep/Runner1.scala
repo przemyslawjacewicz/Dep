@@ -63,11 +63,11 @@ object Runner1 {
             .getOrCreate()
         })
 
-    val catalog: Catalog =
-      (new Catalog)
-        .withTransformations(transformations.toSeq: _*)
-        .withPutTransformations(putTransformations.toSeq: _*)
-        .withMultiPutTransformations(multiPutTransformations.toSeq: _*)
+    import Transformations.implicits._
+    val catalog: Catalog = (new Catalog)
+      .withTransformations(transformations.toSeq: _*)
+      .withTransformations(putTransformations.toSeq: _*)
+      .withTransformations(multiPutTransformations.toSeq: _*)
 
     catalog.show("spark")
     println(catalog.eval[SparkSession]("spark").version)

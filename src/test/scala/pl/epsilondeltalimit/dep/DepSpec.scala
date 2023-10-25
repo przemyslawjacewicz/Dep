@@ -152,15 +152,27 @@ class DepSpec extends AnyFlatSpec with Matchers {
   behavior of "map2"
 
   it should "create a Dep instance with proper id and needs" in {
+    info("map2")
     assertDep(
       Set[Transformation](
-        (c: Catalog) => c.put(Dep.map2("c")(c.get[Int]("a"), c.get[Int]("b"))(_ + _)),
+        (c: Catalog) => c.put(c.get[Int]("a").map2(c.get[Int]("b"))(_ + _)),
         _.unit("b")(2),
         _.unit("a")(1)
       )
         .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("c")
-    )("c", Set("a", "b"), 3)
+        .get[Int]("a_M2")
+    )("a_M2", Set("a", "b"), 3)
+
+    info("map2 + as")
+    assertDep(
+      Set[Transformation](
+        (c: Catalog) => c.put(c.get[Int]("a").map2(c.get[Int]("b"))(_ + _).as("t")),
+        _.unit("b")(2),
+        _.unit("a")(1)
+      )
+        .foldLeft(new Catalog)((c, t) => t(c))
+        .get[Int]("t")
+    )("t", Set("a", "b"), 3)
   }
 
   def assertDep[A](dep: Dep[A])(id: String, needs: Set[String], value: A): Assertion = {
