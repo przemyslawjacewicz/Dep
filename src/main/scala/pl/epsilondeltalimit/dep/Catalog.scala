@@ -45,11 +45,15 @@ class Catalog {
     wrapper(ts) match {
       case Transformations.Transformations(xs) =>
         xs.foldLeft(this)((c, t) => t(c))
+      case Transformations.TransformationsWithImplicitCatalog(xs) =>
+        xs.foldLeft(this)((c, t) => t(c))
       case Transformations.PutTransformations(xs) =>
         xs.foldLeft(this)((c, pt) => c.put(pt(c)))
       case Transformations.PutTransformationsWithImplicitCatalog(xs) =>
         xs.foldLeft(this)((c, pt) => c.put(pt(c)))
       case Transformations.MultiPutTransformations(xs) =>
+        xs.foldLeft(this)((c, mpt) => mpt(c).foldLeft(c)(_.put(_)))
+      case Transformations.MultiPutTransformationsWithImplicitCatalog(xs) =>
         xs.foldLeft(this)((c, mpt) => mpt(c).foldLeft(c)(_.put(_)))
     }
 
