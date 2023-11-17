@@ -1,7 +1,7 @@
 package pl.epsilondeltalimit.dep
 
-//todo: consider adding more transformations with implicit catalog
 object Transformations {
+
   trait Transformation extends (Catalog => Catalog)
 
   trait TransformationWithImplicitCatalog {

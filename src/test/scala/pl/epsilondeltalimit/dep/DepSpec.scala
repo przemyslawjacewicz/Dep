@@ -22,10 +22,10 @@ class DepSpec extends AnyFlatSpec with Matchers {
       end - start
     }
 
-    val dep = new Dep[Unit]("dep", () => Set.empty[String])(() => {
+    val dep = Dep.dep("dep", Set.empty[String]) {
       TimeUnit.SECONDS.sleep(1)
       ()
-    })
+    }
 
     time(dep()) should be > Duration(1, duration.SECONDS).toNanos
     time(dep()) should be < Duration(1, duration.SECONDS).toNanos
@@ -33,7 +33,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
 
   behavior of "map"
 
-  val u: Transformation = (c: Catalog) => c.unit("u")(1)
+  val u: Transformation = (c: Catalog) => c.put("u")(1)
 
   it should "create a Dep instance with proper id and needs" in {
     info("map")
@@ -84,7 +84,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2"))),
-        _.unit("u2")(2),
+        _.put("u2")(2),
         u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
@@ -95,7 +95,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2")).as("t")),
-        _.unit("u2")(2),
+        _.put("u2")(2),
         u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
@@ -106,8 +106,8 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2")).flatMap(_ => c.get[Int]("u3"))),
-        _.unit("u3")(3),
-        _.unit("u2")(2),
+        _.put("u3")(3),
+        _.put("u2")(2),
         u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
@@ -118,8 +118,8 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2")).flatMap(_ => c.get[Int]("u3")).as("t")),
-        _.unit("u3")(3),
-        _.unit("u2")(2),
+        _.put("u3")(3),
+        _.put("u2")(2),
         u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
@@ -130,7 +130,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(u => c.get[Int]("u2").map(u2 => u + u2))),
-        _.unit("u2")(2),
+        _.put("u2")(2),
         u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
@@ -141,7 +141,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("u").flatMap(u => c.get[Int]("u2").map(u2 => u + u2)).as("t")),
-        _.unit("u2")(2),
+        _.put("u2")(2),
         u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
@@ -156,8 +156,8 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("a").map2(c.get[Int]("b"))(_ + _)),
-        _.unit("b")(2),
-        _.unit("a")(1)
+        _.put("b")(2),
+        _.put("a")(1)
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("a_M2")
@@ -167,8 +167,8 @@ class DepSpec extends AnyFlatSpec with Matchers {
     assertDep(
       Set[Transformation](
         (c: Catalog) => c.put(c.get[Int]("a").map2(c.get[Int]("b"))(_ + _).as("t")),
-        _.unit("b")(2),
-        _.unit("a")(1)
+        _.put("b")(2),
+        _.put("a")(1)
       )
         .foldLeft(new Catalog)((c, t) => t(c))
         .get[Int]("t")

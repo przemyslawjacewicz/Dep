@@ -21,25 +21,25 @@ class Catalog {
     go(Set(byId(id)), Seq(Set(id))).reverse
   }
 
-  def unit[A](id: String)(value: => A): Catalog = {
-    s += new Dep[A](id, () => Set.empty[String])(() => value)
+  def put[A](id: String)(value: => A): Catalog = {
+    s += Dep.dep[A](id, Set.empty[String])(value)
     this
   }
-
-  def get[A](id: String): Dep[A] =
-    byId
-      .getOrElse(id, new Dep[A](id, () => byId(id).needs())(() => byId(id).asInstanceOf[Dep[A]]()))
-      .asInstanceOf[Dep[A]]
-
-  // todo: consider removing this
-  def getAll: Set[Dep[_]] =
-    s.toSet
 
   def put[A](dep: Dep[A]): Catalog = {
     //    require(!dep.id.endsWith("_M") && !dep.id.endsWith("_F"), "cannot put intermediate Dep")
     s += dep
     this
   }
+
+  def get[A](id: String): Dep[A] =
+    byId
+      .getOrElse(id, Dep.dep[A](id, byId(id).needs())(byId(id).asInstanceOf[Dep[A]]()))
+      .asInstanceOf[Dep[A]]
+
+  // todo: consider removing this
+  def getAll: Set[Dep[_]] =
+    s.toSet
 
   def withTransformations[T](ts: T*)(implicit wrapper: Seq[T] => Wrapped[T]): Catalog =
     wrapper(ts) match {

@@ -7,6 +7,16 @@ import pl.epsilondeltalimit.dep.Transformations.{MultiPutTransformation, PutTran
 object Runner1 {
   def main(args: Array[String]): Unit = {
 
+    val transformations: Set[Transformation] =
+      Set((c: Catalog) =>
+        c.put("spark") {
+          SparkSession.builder
+            .appName("Runner")
+            .master("local[2]")
+            .config("spark.driver.extraJavaOptions", "-Dlog4j.configuration=log4j2.properties")
+            .getOrCreate()
+        })
+
     val putTransformations: Set[PutTransformation] = Set((c: Catalog) =>
       c.get[SparkSession]("spark")
         .flatMap { spark =>
@@ -53,15 +63,6 @@ object Runner1 {
         Seq(a, b)
       }
 
-    val transformations: Set[Transformation] =
-      Set((c: Catalog) =>
-        c.unit("spark") {
-          SparkSession.builder
-            .appName("Runner")
-            .master("local[2]")
-            .config("spark.driver.extraJavaOptions", "-Dlog4j.configuration=log4j2.properties")
-            .getOrCreate()
-        })
 
     import Transformations.implicits._
     val catalog: Catalog = (new Catalog)
