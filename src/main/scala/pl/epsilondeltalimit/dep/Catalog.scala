@@ -21,13 +21,10 @@ class Catalog {
     go(Set(byId(id)), Seq(Set(id))).reverse
   }
 
-  def put[A](id: String)(value: => A): Catalog = {
-    s += Dep.dep[A](id, Set.empty[String])(value)
-    this
-  }
+  def put[A](id: String)(value: => A): Catalog =
+    put(Dep.dep[A](id, Set.empty[String])(value))
 
   def put[A](dep: Dep[A]): Catalog = {
-    //    require(!dep.id.endsWith("_M") && !dep.id.endsWith("_F"), "cannot put intermediate Dep")
     s += dep
     this
   }
@@ -62,9 +59,6 @@ class Catalog {
     get[A](id)()
   }
 
-  // todo: evalAll ?
-
-  // todo: consider a lib create a graph
   def explain(id: String): Seq[Set[String]] =
     stages(id)
 
