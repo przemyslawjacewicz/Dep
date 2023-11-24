@@ -14,25 +14,17 @@ object Transformations {
     def apply(implicit c: Catalog): Dep[_]
   }
 
-  trait MultiPutTransformation extends (Catalog => Seq[Dep[_]])
-
-  trait MultiPutTransformationWithImplicitCatalog {
-    def apply(implicit c: Catalog): Seq[Dep[_]]
-  }
-
   sealed trait Wrapped[T]
 
   case class Transformations(xs: Seq[Transformation]) extends Wrapped[Transformation]
 
-  case class TransformationsWithImplicitCatalog(xs: Seq[TransformationWithImplicitCatalog]) extends Wrapped[TransformationWithImplicitCatalog]
+  case class TransformationsWithImplicitCatalog(xs: Seq[TransformationWithImplicitCatalog])
+      extends Wrapped[TransformationWithImplicitCatalog]
 
   case class PutTransformations(xs: Seq[PutTransformation]) extends Wrapped[PutTransformation]
 
-  case class PutTransformationsWithImplicitCatalog(xs: Seq[PutTransformationWithImplicitCatalog]) extends Wrapped[PutTransformationWithImplicitCatalog]
-
-  case class MultiPutTransformations(xs: Seq[MultiPutTransformation]) extends Wrapped[MultiPutTransformation]
-
-  case class MultiPutTransformationsWithImplicitCatalog(xs: Seq[MultiPutTransformationWithImplicitCatalog]) extends Wrapped[MultiPutTransformationWithImplicitCatalog]
+  case class PutTransformationsWithImplicitCatalog(xs: Seq[PutTransformationWithImplicitCatalog])
+      extends Wrapped[PutTransformationWithImplicitCatalog]
 
   object implicits {
 
@@ -47,11 +39,5 @@ object Transformations {
 
     implicit val wrapPutTransformationsWithImplicitCatalog: Seq[PutTransformationWithImplicitCatalog] => Wrapped[PutTransformationWithImplicitCatalog] =
       PutTransformationsWithImplicitCatalog
-
-    implicit val wrapMultiPutTransformations: Seq[MultiPutTransformation] => Wrapped[MultiPutTransformation] =
-      MultiPutTransformations
-
-    implicit val wrapMultiPutTransformationsWithImplicitCatalog: Seq[MultiPutTransformationWithImplicitCatalog] => Wrapped[MultiPutTransformationWithImplicitCatalog] =
-      MultiPutTransformationsWithImplicitCatalog
   }
 }

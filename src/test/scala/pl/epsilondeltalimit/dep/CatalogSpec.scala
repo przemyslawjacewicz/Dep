@@ -38,12 +38,13 @@ class CatalogSpec extends AnyFlatSpec with Matchers {
     (new Catalog)
       .withTransformations(new Transformations.PutTransformation {
         override def apply(c: Catalog): Dep[_] =
-          Dep.dep[String]("u", Set.empty)("u")
+          new LeafDep[String]("u", () => Set.empty)(() => "u")
       })
       .eval[String]("u") should ===("u")
 
     (new Catalog)
-      .withTransformations[Transformations.PutTransformation]((c: Catalog) => Dep.dep[String]("u", Set.empty)("u"))
+      .withTransformations[Transformations.PutTransformation]((_: Catalog) =>
+        new LeafDep[String]("u", () => Set.empty)(() => "u"))
       .eval[String]("u") should ===("u")
   }
 
@@ -51,49 +52,14 @@ class CatalogSpec extends AnyFlatSpec with Matchers {
     (new Catalog)
       .withTransformations(new Transformations.PutTransformationWithImplicitCatalog {
         override def apply(implicit c: Catalog): Dep[_] =
-          Dep.dep[String]("u", Set.empty)("u")
+          new LeafDep[String]("u", () => Set.empty)(() => "u")
       })
       .eval[String]("u") should ===("u")
 
     (new Catalog)
-      .withTransformations[Transformations.PutTransformationWithImplicitCatalog]((c: Catalog) => Dep.dep[String]("u", Set.empty)("u"))
+      .withTransformations[Transformations.PutTransformationWithImplicitCatalog]((_: Catalog) =>
+        new LeafDep[String]("u", () => Set.empty)(() => "u"))
       .eval[String]("u") should ===("u")
   }
-
-  it should "add multi put transformations" in {
-    (new Catalog)
-      .withTransformations(new Transformations.MultiPutTransformation {
-        override def apply(c: Catalog): Seq[Dep[_]] =
-          Seq(Dep.dep[String]("u", Set.empty)("u"))
-      })
-      .eval[String]("u") should ===("u")
-
-    (new Catalog)
-      .withTransformations[Transformations.MultiPutTransformation]((c: Catalog) => Seq(Dep.dep[String]("u", Set.empty)("u")))
-      .eval[String]("u") should ===("u")
-  }
-
-  it should "add multi put transformations with implicit catalog" in {
-    (new Catalog)
-      .withTransformations(new Transformations.MultiPutTransformationWithImplicitCatalog {
-        override def apply(implicit c: Catalog): Seq[Dep[_]] =
-          Seq(Dep.dep[String]("u", Set.empty)("u"))
-      })
-      .eval[String]("u") should ===("u")
-
-    (new Catalog)
-      .withTransformations[Transformations.MultiPutTransformationWithImplicitCatalog]((c: Catalog) => Seq(Dep.dep[String]("u", Set.empty)("u")))
-      .eval[String]("u") should ===("u")
-  }
-
-  behavior of "explain"
-
-  it should "???" in {
-
-    println((new Catalog).explain("id"))
-
-
-  }
-
 
 }

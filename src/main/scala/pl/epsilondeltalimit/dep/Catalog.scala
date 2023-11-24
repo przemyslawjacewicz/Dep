@@ -21,8 +21,10 @@ class Catalog {
     go(Set(byId(id)), Seq(Set(id))).reverse
   }
 
-  def put[A](id: String)(value: => A): Catalog =
-    put(Dep.dep[A](id, Set.empty[String])(value))
+  def put[A](id: String)(value: => A): Catalog = {
+    s += new LeafDep[A](id, () => Set.empty)(() => value)
+    this
+  }
 
   def put[A](dep: Dep[A]): Catalog = {
     s += dep
@@ -31,7 +33,7 @@ class Catalog {
 
   def get[A](id: String): Dep[A] =
     byId
-      .getOrElse(id, Dep.dep[A](id, byId(id).needs())(byId(id).asInstanceOf[Dep[A]]()))
+      .getOrElse(id, new LeafDep[A](id, () => byId(id).needs())(() => byId(id).asInstanceOf[Dep[A]]()))
       .asInstanceOf[Dep[A]]
 
   // todo: consider removing this
@@ -48,10 +50,6 @@ class Catalog {
         xs.foldLeft(this)((c, pt) => c.put(pt(c)))
       case Transformations.PutTransformationsWithImplicitCatalog(xs) =>
         xs.foldLeft(this)((c, pt) => c.put(pt(c)))
-      case Transformations.MultiPutTransformations(xs) =>
-        xs.foldLeft(this)((c, mpt) => mpt(c).foldLeft(c)(_.put(_)))
-      case Transformations.MultiPutTransformationsWithImplicitCatalog(xs) =>
-        xs.foldLeft(this)((c, mpt) => mpt(c).foldLeft(c)(_.put(_)))
     }
 
   def eval[A](id: String): A = {

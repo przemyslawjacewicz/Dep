@@ -22,10 +22,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
       end - start
     }
 
-    val dep = Dep.dep("dep", Set.empty[String]) {
-      TimeUnit.SECONDS.sleep(1)
-      ()
-    }
+    val dep = new LeafDep[Unit]("dep", () => Set.empty)(() => TimeUnit.SECONDS.sleep(1))
 
     time(dep()) should be > Duration(1, duration.SECONDS).toNanos
     time(dep()) should be < Duration(1, duration.SECONDS).toNanos
@@ -88,8 +85,8 @@ class DepSpec extends AnyFlatSpec with Matchers {
         u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("u_F")
-    )("u_F", Set("u", "u2"), 2)
+        .get[Int]("u_FM")
+    )("u_FM", Set("u", "u2"), 2)
 
     info("flatMap + as")
     assertDep(
@@ -111,8 +108,8 @@ class DepSpec extends AnyFlatSpec with Matchers {
         u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("u_F_F")
-    )("u_F_F", Set("u", "u2", "u3"), 3)
+        .get[Int]("u_FM_FM")
+    )("u_FM_FM", Set("u", "u2", "u3"), 3)
 
     info("flatMap + flatMap + as")
     assertDep(
@@ -134,8 +131,8 @@ class DepSpec extends AnyFlatSpec with Matchers {
         u
       )
         .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("u_F")
-    )("u_F", Set("u", "u2"), 3)
+        .get[Int]("u_FM")
+    )("u_FM", Set("u", "u2"), 3)
 
     info("flatMap + map + as")
     assertDep(
