@@ -67,21 +67,21 @@ class BranchDep[A] private[dep] (id: String, needs: () => Set[String])(value: ()
 
 object Dep {
 
-//  def dep[A](id: String)(value: => A): Dep[A] =
-//    leafDep(id)(value)
-//
-//  def dep[A](id: String, needs: => Set[String])(value: => A): Dep[A] =
-//    leafDep(id, needs)(value)
-//
+  def dep[A](id: String)(value: => A): Dep[A] =
+    new LeafDep[A](id, () => Set.empty)(() => value)
+
+  def dep[A](id: String, needs: => Set[String])(value: => A): Dep[A] =
+    new LeafDep[A](id, () => needs)(() => value)
+
 //  def leafDep[A](id: String)(value: => A): Dep[A] =
 //    new LeafDep[A](id, () => Set.empty)(() => value)
-//
+
 //  def leafDep[A](id: String, needs: => Set[String])(value: => A): Dep[A] =
 //    new LeafDep[A](id, () => needs)(() => value)
-//
+
 //  def branchDep[A](id: String)(value: => A): Dep[A] =
 //    new LeafDep[A](id, () => Set.empty)(() => value)
-//
+
 //  def branchDep[A](id: String, needs: => Set[String])(value: => A): Dep[A] =
 //    new LeafDep[A](id, () => needs)(() => value)
 
