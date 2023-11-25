@@ -53,7 +53,6 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String])(value
           }
 
         new BranchDep[B](s"${id}_FM", () => getNeeds)(() => f(apply()).apply())
-
     }
 
   def as(id: String): Dep[A] =

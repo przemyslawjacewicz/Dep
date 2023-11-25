@@ -18,7 +18,19 @@ class Catalog {
       if (needs.isEmpty) acc else go(needs.map(byId), needs +: acc)
     }
 
-    go(Set(byId(id)), Seq(Set(id))).reverse
+    val raw = go(Set(byId(id)), Seq(Set(id))).reverse
+
+    def norm(s: Seq[Set[String]]): Set[String] =
+      s match {
+        case next :: prev :: Nil => next.diff(prev)
+        case single :: Nil       => single
+      }
+
+    raw match {
+      case _ :: Nil      => raw
+      case _ :: _ :: Nil => raw
+      case _             => Seq(raw.head) ++ raw.tail.sliding(2).map(norm) ++ Set(raw.last)
+    }
   }
 
   def put[A](id: String)(value: => A): Catalog = {

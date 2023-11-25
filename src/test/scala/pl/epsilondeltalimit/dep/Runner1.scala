@@ -72,16 +72,20 @@ object Runner1 {
     val catalog: Catalog = (new Catalog)
       .withTransformations(c, b, a, spark)
 
-    catalog.show("spark")
-    println(catalog.eval[SparkSession]("spark").version)
+    println("=== c ===")
+    catalog.show("c")
+    catalog.eval[DataFrame]("c").show()
 
-    catalog.show("a")
-    catalog.eval[DataFrame]("a").show()
-
+    println("=== b ===")
     catalog.show("b")
     catalog.eval[DataFrame]("b").show()
 
-    catalog.show("c")
-    catalog.eval[DataFrame]("c").show()
+    println("=== a ===")
+    catalog.show("a")
+    catalog.eval[DataFrame]("a").show()
+
+    println("=== spark ===")
+    catalog.show("spark")
+    println(catalog.eval[SparkSession]("spark").version)
   }
 }
