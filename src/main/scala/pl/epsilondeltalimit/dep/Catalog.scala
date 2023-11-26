@@ -27,9 +27,8 @@ class Catalog {
       }
 
     raw match {
-      case _ :: Nil      => raw
-      case _ :: _ :: Nil => raw
-      case _             => Seq(raw.head) ++ raw.tail.sliding(2).map(norm) ++ Set(raw.last)
+      case _ :: Nil | _ :: _ :: Nil => raw
+      case _                        => Seq(raw.head) ++ raw.tail.sliding(2).map(norm) ++ Set(raw.last)
     }
   }
 
