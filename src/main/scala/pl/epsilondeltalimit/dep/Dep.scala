@@ -2,7 +2,7 @@ package pl.epsilondeltalimit.dep
 
 //todo: consider removing needs forwarding
 
-sealed abstract class Dep[A](val id: String, val needs: () => Set[String])(value: () => A) extends (() => A) {
+sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val value: () => A) extends (() => A) {
   private lazy val cached = value()
 
   override def apply(): A =
@@ -12,7 +12,7 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String])(value
   def map[B](f: A => B): Dep[B] =
     this match {
       case _: LeafDep[_] =>
-        new BranchDep[B](s"${id}_M", () => needs() + id)(() => f(apply()))
+        new BranchDep[B](s"${id}_M", () => needs() + id, () => f(apply()))
       case _: BranchDep[_] =>
         new BranchDep[B](s"${id}_M", () => needs())(() => f(apply()))
     }
@@ -60,17 +60,23 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String])(value
 
 }
 
-class LeafDep[A] private[dep] (id: String, needs: () => Set[String])(value: () => A) extends Dep[A](id, needs)(value)
+case class LeafDep[A] private[dep] (override val id: String,
+                                    override val needs: () => Set[String],
+                                    override val value: () => A)
+    extends Dep[A](id, needs, value)
 
-class BranchDep[A] private[dep] (id: String, needs: () => Set[String])(value: () => A) extends Dep[A](id, needs)(value)
+case class BranchDep[A] private[dep] (override val id: String,
+                                      override val needs: () => Set[String],
+                                      override val value: () => A)
+    extends Dep[A](id, needs, value)
 
 object Dep {
 
-  def dep[A](id: String)(value: => A): Dep[A] =
-    new LeafDep[A](id, () => Set.empty)(() => value)
+  def dep[A](id: String, value: => A): Dep[A] =
+    new LeafDep[A](id, () => Set.empty, () => value)
 
-  def dep[A](id: String, needs: => Set[String])(value: => A): Dep[A] =
-    new LeafDep[A](id, () => needs)(() => value)
+  def dep[A](id: String, needs: => Set[String], value: => A): Dep[A] =
+    new LeafDep[A](id, () => needs, () => value)
 
 //  def leafDep[A](id: String)(value: => A): Dep[A] =
 //    new LeafDep[A](id, () => Set.empty)(() => value)
