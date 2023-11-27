@@ -14,7 +14,7 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
       case _: LeafDep[_] =>
         new BranchDep[B](s"${id}_M", () => needs() + id, () => f(apply()))
       case _: BranchDep[_] =>
-        new BranchDep[B](s"${id}_M", () => needs())(() => f(apply()))
+        new BranchDep[B](s"${id}_M", () => needs(), () => f(apply()))
     }
 
   def map2[B, C](b: Dep[B])(f: (A, B) => C): Dep[C] =
@@ -22,16 +22,16 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
       case _: LeafDep[_] =>
         b match {
           case _: LeafDep[_] =>
-            new BranchDep[C](s"${id}_M2", () => needs() + id + b.id)(() => f(apply(), b()))
+            new BranchDep[C](s"${id}_M2", () => needs() + id + b.id, () => f(apply(), b()))
           case _: BranchDep[_] =>
-            new BranchDep[C](s"${id}_M2", () => needs() + id)(() => f(apply(), b()))
+            new BranchDep[C](s"${id}_M2", () => needs() + id, () => f(apply(), b()))
         }
       case _: BranchDep[_] =>
         b match {
           case _: LeafDep[_] =>
-            new BranchDep[C](s"${id}_M2", () => needs() + b.id)(() => f(apply(), b()))
+            new BranchDep[C](s"${id}_M2", () => needs() + b.id, () => f(apply(), b()))
           case _: BranchDep[_] =>
-            new BranchDep[C](s"${id}_M2", needs)(() => f(apply(), b()))
+            new BranchDep[C](s"${id}_M2", needs, () => f(apply(), b()))
         }
     }
 
@@ -44,7 +44,7 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
             case dep: BranchDep[_] => needs() + id ++ dep.needs()
           }
 
-        new BranchDep[B](s"${id}_FM", () => getNeeds)(() => f(apply()).apply())
+        new BranchDep[B](s"${id}_FM", () => getNeeds, () => f(apply()).apply())
       case _: BranchDep[_] =>
         def getNeeds =
           f(apply()) match {
@@ -52,11 +52,11 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
             case dep: BranchDep[_] => needs() ++ dep.needs()
           }
 
-        new BranchDep[B](s"${id}_FM", () => getNeeds)(() => f(apply()).apply())
+        new BranchDep[B](s"${id}_FM", () => getNeeds, () => f(apply()).apply())
     }
 
   def as(id: String): Dep[A] =
-    new LeafDep[A](id, needs)(apply)
+    new LeafDep[A](id, needs, apply)
 
 }
 
