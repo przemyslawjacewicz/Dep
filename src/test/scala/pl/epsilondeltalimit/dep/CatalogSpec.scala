@@ -38,13 +38,13 @@ class CatalogSpec extends AnyFlatSpec with Matchers {
     (new Catalog)
       .withTransformations(new Transformations.PutTransformation {
         override def apply(c: Catalog): Dep[_] =
-          new LeafDep[String]("u", () => Set.empty, () => "u")
+          LeafDep[String]("u", () => Set.empty, () => "u")
       })
       .eval[String]("u") should ===("u")
 
     (new Catalog)
       .withTransformations[Transformations.PutTransformation]((_: Catalog) =>
-        new LeafDep[String]("u", () => Set.empty, () => "u"))
+        LeafDep[String]("u", () => Set.empty, () => "u"))
       .eval[String]("u") should ===("u")
   }
 
@@ -52,13 +52,13 @@ class CatalogSpec extends AnyFlatSpec with Matchers {
     (new Catalog)
       .withTransformations(new Transformations.PutTransformationWithImplicitCatalog {
         override def apply(implicit c: Catalog): Dep[_] =
-          new LeafDep[String]("u", () => Set.empty, () => "u")
+          LeafDep[String]("u", () => Set.empty, () => "u")
       })
       .eval[String]("u") should ===("u")
 
     (new Catalog)
       .withTransformations[Transformations.PutTransformationWithImplicitCatalog]((_: Catalog) =>
-        new LeafDep[String]("u", () => Set.empty, () => "u"))
+        LeafDep[String]("u", () => Set.empty, () => "u"))
       .eval[String]("u") should ===("u")
   }
 

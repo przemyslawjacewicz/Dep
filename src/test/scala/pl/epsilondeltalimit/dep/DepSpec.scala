@@ -22,7 +22,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
       end - start
     }
 
-    val dep = new LeafDep[Unit]("dep", () => Set.empty, () => TimeUnit.SECONDS.sleep(1))
+    val dep = LeafDep[Unit]("dep", () => Set.empty, () => TimeUnit.SECONDS.sleep(1))
 
     time(dep()) should be > Duration(1, duration.SECONDS).toNanos
     time(dep()) should be < Duration(1, duration.SECONDS).toNanos
