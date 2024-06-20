@@ -1,7 +1,7 @@
 package pl.epsilondeltalimit.dep
 
 //todo: consider removing needs forwarding
-
+//todo: extend () => A is unexpected -> suggests that there are no dependencies for this Dep, which may be not true
 sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val value: () => A) extends (() => A) {
   private lazy val cached = value()
 
@@ -38,7 +38,7 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
   def flatMap[B](f: A => Dep[B]): Dep[B] =
     this match {
       case _: LeafDep[_] =>
-        def getNeeds =
+        lazy val getNeeds =
           f(apply()) match {
             case dep: LeafDep[_]   => needs() + id ++ dep.needs() + dep.id
             case dep: BranchDep[_] => needs() + id ++ dep.needs()
@@ -46,7 +46,7 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
 
         BranchDep[B](s"${id}_FM", () => getNeeds, () => f(apply()).apply())
       case _: BranchDep[_] =>
-        def getNeeds =
+        lazy val getNeeds =
           f(apply()) match {
             case dep: LeafDep[_]   => needs() ++ dep.needs() + dep.id
             case dep: BranchDep[_] => needs() ++ dep.needs()
@@ -55,6 +55,7 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
         BranchDep[B](s"${id}_FM", () => getNeeds, () => f(apply()).apply())
     }
 
+  //todo: consider a different name e.g. collect
   def as(id: String): Dep[A] =
     LeafDep[A](id, needs, apply)
 

@@ -1,6 +1,6 @@
 package pl.epsilondeltalimit.dep.once
 
-import scala.language.implicitConversions
+//import scala.language.implicitConversions
 
 class Once[A](a: => A) extends (() => A) {
   private lazy val value = a
@@ -10,7 +10,11 @@ class Once[A](a: => A) extends (() => A) {
 
 object Once {
   object implicits {
-    implicit def value2Once[A](a: A): Once[A] =
-      new Once[A](a)
+//    implicit def value2Once[A](a: A): Once[A] =
+//      new Once[A](a)
+
+//    implicit class OnceOps[A](a: A) ex
+
+
   }
 }

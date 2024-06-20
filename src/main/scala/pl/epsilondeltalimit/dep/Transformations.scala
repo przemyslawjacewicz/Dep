@@ -1,5 +1,6 @@
 package pl.epsilondeltalimit.dep
 
+// todo: move to dedicated packages
 object Transformations {
 
   trait Transformation extends (Catalog => Catalog)
