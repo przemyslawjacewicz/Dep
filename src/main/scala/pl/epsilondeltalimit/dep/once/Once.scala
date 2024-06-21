@@ -2,6 +2,7 @@ package pl.epsilondeltalimit.dep.once
 
 //import scala.language.implicitConversions
 
+//todo: consider removing
 class Once[A](a: => A) extends (() => A) {
   private lazy val value = a
 

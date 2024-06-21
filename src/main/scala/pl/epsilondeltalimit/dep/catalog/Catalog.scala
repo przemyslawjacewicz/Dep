@@ -1,6 +1,7 @@
-package pl.epsilondeltalimit.dep
+package pl.epsilondeltalimit.dep.catalog
 
-import pl.epsilondeltalimit.dep.Transformations._
+import pl.epsilondeltalimit.dep.transformation._
+import pl.epsilondeltalimit.dep.dep.{Dep, LeafDep}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -51,16 +52,12 @@ class Catalog {
   def getAll: Set[Dep[_]] =
     s.toSet
 
-  def withTransformations[T](ts: T*)(implicit wrapper: Seq[T] => Wrapped[T]): Catalog =
+  def withTransformations[T](ts: T*)(implicit wrapper: Seq[T] => Wrapper[T]): Catalog =
     wrapper(ts) match {
-      case Transformations.Transformations(xs) =>
-        xs.foldLeft(this)((c, t) => t(c))
-      case Transformations.TransformationsWithImplicitCatalog(xs) =>
-        xs.foldLeft(this)((c, t) => t(c))
-      case Transformations.PutTransformations(xs) =>
-        xs.foldLeft(this)((c, pt) => c.put(pt(c)))
-      case Transformations.PutTransformationsWithImplicitCatalog(xs) =>
-        xs.foldLeft(this)((c, pt) => c.put(pt(c)))
+      case Transformations(xs)                       => xs.foldLeft(this)((c, t) => t(c))
+      case TransformationsWithImplicitCatalog(xs)    => xs.foldLeft(this)((c, t) => t(c))
+      case PutTransformations(xs)                    => xs.foldLeft(this)((c, pt) => c.put(pt(c)))
+      case PutTransformationsWithImplicitCatalog(xs) => xs.foldLeft(this)((c, pt) => c.put(pt(c)))
     }
 
   def eval[A](id: String): A = {

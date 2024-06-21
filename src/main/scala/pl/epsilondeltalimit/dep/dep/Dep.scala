@@ -1,4 +1,6 @@
-package pl.epsilondeltalimit.dep
+package pl.epsilondeltalimit.dep.dep
+
+import pl.epsilondeltalimit.dep.catalog.Catalog
 
 //todo: consider removing needs forwarding
 //todo: extend () => A is unexpected -> suggests that there are no dependencies for this Dep, which may be not true
