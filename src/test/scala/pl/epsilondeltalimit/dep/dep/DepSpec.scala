@@ -1,16 +1,16 @@
-package pl.epsilondeltalimit.dep
+package pl.epsilondeltalimit.dep.dep
 
 import org.scalatest.Assertion
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import pl.epsilondeltalimit.dep.catalog.Catalog
-import pl.epsilondeltalimit.dep.dep.{Dep, LeafDep}
 import pl.epsilondeltalimit.dep.transformation.Transformation
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration
 import scala.concurrent.duration.Duration
 
+//todo: remove me
 class DepSpec extends AnyFlatSpec with Matchers {
 
   behavior of "apply"

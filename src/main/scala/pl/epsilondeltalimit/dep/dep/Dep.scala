@@ -24,16 +24,16 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
       case _: LeafDep[_] =>
         b match {
           case _: LeafDep[_] =>
-            BranchDep[C](s"${id}_M2", () => needs() + id + b.id, () => f(apply(), b()))
+            BranchDep[C](s"${id}_M2", () => needs() + id ++ b.needs() + b.id, () => f(apply(), b()))
           case _: BranchDep[_] =>
-            BranchDep[C](s"${id}_M2", () => needs() + id, () => f(apply(), b()))
+            BranchDep[C](s"${id}_M2", () => needs() + id ++ b.needs(), () => f(apply(), b()))
         }
       case _: BranchDep[_] =>
         b match {
           case _: LeafDep[_] =>
-            BranchDep[C](s"${id}_M2", () => needs() + b.id, () => f(apply(), b()))
+            BranchDep[C](s"${id}_M2", () => needs() ++ b.needs() + b.id, () => f(apply(), b()))
           case _: BranchDep[_] =>
-            BranchDep[C](s"${id}_M2", needs, () => f(apply(), b()))
+            BranchDep[C](s"${id}_M2", () => needs() ++ b.needs(), () => f(apply(), b()))
         }
     }
 
@@ -57,17 +57,33 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
         BranchDep[B](s"${id}_FM", () => getNeeds, () => f(apply()).apply())
     }
 
-  //todo: consider a different name e.g. collect
+  // todo: consider a different name e.g. collect
   def as(id: String): Dep[A] =
     LeafDep[A](id, needs, apply)
 
 }
 
-case class LeafDep[A](override val id: String, override val needs: () => Set[String], override val value: () => A)
+//todo: consider a different name - Result, Res, Final, EndDep => Result
+case class LeafDep[A] private[dep] (override val id: String,
+                                    override val needs: () => Set[String],
+                                    override val value: () => A)
     extends Dep[A](id, needs, value)
 
-case class BranchDep[A](override val id: String, override val needs: () => Set[String], override val value: () => A)
+object LeafDep {
+  private[dep] def apply[A](id: String, needs: () => Set[String], value: () => A): LeafDep[A] =
+    new LeafDep(id, needs, value)
+}
+
+//todo: consider a different name - Intermediate, Inter, IDep, Transitive, Part => Part
+case class BranchDep[A] private[dep] (override val id: String,
+                                      override val needs: () => Set[String],
+                                      override val value: () => A)
     extends Dep[A](id, needs, value)
+
+object BranchDep {
+  private[dep] def apply[A](id: String, needs: () => Set[String], value: () => A): BranchDep[A] =
+    new BranchDep[A](id, needs, value)
+}
 
 object Dep {
 
@@ -75,18 +91,6 @@ object Dep {
     LeafDep[A](id, () => Set.empty, () => value)
 
   def dep[A](id: String, needs: => Set[String])(value: => A): Dep[A] =
-    LeafDep[A](id, () => needs, () => value)
-
-  def leafDep[A](id: String)(value: => A): Dep[A] =
-    LeafDep[A](id, () => Set.empty, () => value)
-
-  def leafDep[A](id: String, needs: => Set[String])(value: => A): Dep[A] =
-    LeafDep[A](id, () => needs, () => value)
-
-  def branchDep[A](id: String)(value: => A): Dep[A] =
-    LeafDep[A](id, () => Set.empty, () => value)
-
-  def branchDep[A](id: String, needs: => Set[String])(value: => A): Dep[A] =
     LeafDep[A](id, () => needs, () => value)
 
   object implicits {
