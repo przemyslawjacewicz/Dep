@@ -34,7 +34,7 @@ class Catalog {
   }
 
   def put[A](id: String)(value: => A): Catalog = {
-    s += LeafDep[A](id, () => Set.empty, () => value)
+    s += Dep.dep[A](id)(value)
     this
   }
 
@@ -45,7 +45,7 @@ class Catalog {
 
   def get[A](id: String): Dep[A] =
     byId
-      .getOrElse(id, LeafDep[A](id, () => byId(id).needs(), () => byId(id).asInstanceOf[Dep[A]]()))
+      .getOrElse(id, Dep.dep[A](id, byId(id).needs())(byId(id).asInstanceOf[Dep[A]]()))
       .asInstanceOf[Dep[A]]
 
   // todo: consider removing this
