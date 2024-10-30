@@ -1,17 +1,26 @@
 package pl.epsilondeltalimit.dep.dep
 
-import org.scalatest.Assertion
+import org.scalactic.Equality
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import pl.epsilondeltalimit.dep.catalog.Catalog
-import pl.epsilondeltalimit.dep.transformation.Transformation
+import pl.epsilondeltalimit.dep.transformation.CatalogTransformation
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration
 import scala.concurrent.duration.Duration
 
-//todo: remove me
 class DepSpec extends AnyFlatSpec with Matchers {
+
+  implicit val depEq: Equality[Dep[Int]] = (a: Dep[Int], b: Any) => {
+    println(s"DEBUG: a.class=${a.getClass}, id=${a.id}, needs=${a.needs()}, value=${a.value()}")
+    println(s"DEBUG: b.class=${b.getClass}, id=${b
+      .asInstanceOf[Dep[_]]
+      .id}, needs=${b.asInstanceOf[Dep[_]].needs()}, value=${b.asInstanceOf[Dep[_]].value()}")
+    b match {
+      case d: Dep[_] => a.getClass == d.getClass && a.id == d.id && a.needs() == d.needs() && a.value() == d.value()
+      case _         => false
+    }
+  }
 
   behavior of "apply"
 
@@ -32,152 +41,224 @@ class DepSpec extends AnyFlatSpec with Matchers {
 
   behavior of "map"
 
-  val t: Transformation = _.put("u")(1)
+  val t: CatalogTransformation = _.put("u")(1)
 
   it should "create a Dep instance with proper id and needs" in {
     info("map")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("u").map(_ + 1)),
-        t
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("u_M")
-    )(id = "u_M", needs = Set("u"), value = 2)
+    LeafDep("id", () => Set("u"), () => 1).map(_ + 1) should ===(BranchDep("id_M", () => Set("u", "id"), () => 2))
+    BranchDep("id", () => Set("u"), () => 1).map(_ + 1) should ===(BranchDep("id_M", () => Set("u"), () => 2))
 
     info("map + as")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("u").map(_ + 1).as("t")),
-        t
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("t")
-    )(id = "t", needs = Set("u"), value = 2)
+    LeafDep("id", () => Set("u"), () => 1).map(_ + 1).as("t") should ===(LeafDep("t", () => Set("u", "id"), () => 2))
+    BranchDep("id", () => Set("u"), () => 1).map(_ + 1).as("t") should ===(LeafDep("t", () => Set("u"), () => 2))
 
     info("map + map")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("u").map(_ + 1).map(_ + 1)),
-        t
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("u_M_M")
-    )(id = "u_M_M", needs = Set("u"), value = 3)
+    LeafDep("id", () => Set("u"), () => 1).map(_ + 1).map(_ + 1) should ===(
+      BranchDep("id_M_M", () => Set("u", "id"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1).map(_ + 1).map(_ + 1) should ===(
+      BranchDep("id_M_M", () => Set("u"), () => 3))
 
     info("map + map + as")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("u").map(_ + 1).map(_ + 1).as("t")),
-        t
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("t")
-    )(id = "t", needs = Set("u"), value = 3)
+    LeafDep("id", () => Set("u"), () => 1).map(_ + 1).map(_ + 1).as("t") should ===(
+      LeafDep("t", () => Set("u", "id"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1).map(_ + 1).map(_ + 1).as("t") should ===(
+      LeafDep("t", () => Set("u"), () => 3))
   }
 
   behavior of "flatMap"
 
   it should "create a Dep instance with proper id and needs" in {
     info("flatMap")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2"))),
-        _.put("u2")(2),
-        t
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("u_FM")
-    )(id = "u_FM", needs = Set("u", "u2"), value = 2)
+    LeafDep("id", () => Set("u"), () => 1).flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1)) should ===(
+      BranchDep("id_FM", () => Set("u", "id", "u2", "id2"), () => 2))
+    LeafDep("id", () => Set("u"), () => 1).flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1)) should ===(
+      BranchDep("id_FM", () => Set("u", "id", "u2"), () => 2))
+
+    BranchDep("id", () => Set("u"), () => 1).flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1)) should ===(
+      BranchDep("id_FM", () => Set("u", "u2", "id2"), () => 2))
+    BranchDep("id", () => Set("u"), () => 1).flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1)) should ===(
+      BranchDep("id_FM", () => Set("u", "u2"), () => 2))
 
     info("flatMap + as")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2")).as("t")),
-        _.put("u2")(2),
-        t
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("t")
-    )(id = "t", needs = Set("u", "u2"), value = 2)
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "id", "u2", "id2"), () => 2))
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "id", "u2"), () => 2))
+
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "u2", "id2"), () => 2))
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "u2"), () => 2))
 
     info("flatMap + flatMap")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2")).flatMap(_ => c.get[Int]("u3"))),
-        _.put("u3")(3),
-        _.put("u2")(2),
-        t
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("u_FM_FM")
-    )(id = "u_FM_FM", needs = Set("u", "u2", "u3"), value = 3)
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => LeafDep("id3", () => Set("u3"), () => j + 1)) should ===(
+      BranchDep("id_FM_FM", () => Set("u", "id", "u2", "id2", "u3", "id3"), () => 3))
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => BranchDep("id3", () => Set("u3"), () => j + 1)) should ===(
+      BranchDep("id_FM_FM", () => Set("u", "id", "u2", "id2", "u3"), () => 3))
+
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => LeafDep("id3", () => Set("u3"), () => j + 1)) should ===(
+      BranchDep("id_FM_FM", () => Set("u", "id", "u2", "u3", "id3"), () => 3))
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => BranchDep("id3", () => Set("u3"), () => j + 1)) should ===(
+      BranchDep("id_FM_FM", () => Set("u", "id", "u2", "u3"), () => 3))
+
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => LeafDep("id3", () => Set("u3"), () => j + 1)) should ===(
+      BranchDep("id_FM_FM", () => Set("u", "u2", "id2", "u3", "id3"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => BranchDep("id3", () => Set("u3"), () => j + 1)) should ===(
+      BranchDep("id_FM_FM", () => Set("u", "u2", "id2", "u3"), () => 3))
+
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => LeafDep("id3", () => Set("u3"), () => j + 1)) should ===(
+      BranchDep("id_FM_FM", () => Set("u", "u2", "u3", "id3"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => BranchDep("id3", () => Set("u3"), () => j + 1)) should ===(
+      BranchDep("id_FM_FM", () => Set("u", "u2", "u3"), () => 3))
 
     info("flatMap + flatMap + as")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("u").flatMap(_ => c.get[Int]("u2")).flatMap(_ => c.get[Int]("u3")).as("t")),
-        _.put("u3")(3),
-        _.put("u2")(2),
-        t
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("t")
-    )(id = "t", needs = Set("u", "u2", "u3"), value = 3)
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => LeafDep("id3", () => Set("u3"), () => j + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "id", "u2", "id2", "u3", "id3"), () => 3))
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => BranchDep("id3", () => Set("u3"), () => j + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "id", "u2", "id2", "u3"), () => 3))
+
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => LeafDep("id3", () => Set("u3"), () => j + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "id", "u2", "u3", "id3"), () => 3))
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => BranchDep("id3", () => Set("u3"), () => j + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "id", "u2", "u3"), () => 3))
+
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => LeafDep("id3", () => Set("u3"), () => j + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "u2", "id2", "u3", "id3"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => BranchDep("id3", () => Set("u3"), () => j + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "u2", "id2", "u3"), () => 3))
+
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => LeafDep("id3", () => Set("u3"), () => j + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "u2", "u3", "id3"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .flatMap(j => BranchDep("id3", () => Set("u3"), () => j + 1))
+      .as("t") should ===(LeafDep("t", () => Set("u", "u2", "u3"), () => 3))
 
     info("flatMap + map")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("u").flatMap(u => c.get[Int]("u2").map(u2 => u + u2))),
-        _.put("u2")(2),
-        t
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("u_FM")
-    )(id = "u_FM", needs = Set("u", "u2"), value = 3)
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1) should ===(BranchDep("id_FM_M", () => Set("u", "id", "u2", "id2"), () => 3))
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1) should ===(BranchDep("id_FM_M", () => Set("u", "id", "u2", "id2"), () => 3))
+
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1) should ===(BranchDep("id_FM_M", () => Set("u", "id", "u2"), () => 3))
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1) should ===(BranchDep("id_FM_M", () => Set("u", "id", "u2"), () => 3))
+
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1) should ===(BranchDep("id_FM_M", () => Set("u", "u2", "id2"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1) should ===(BranchDep("id_FM_M", () => Set("u", "u2", "id2"), () => 3))
+
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1) should ===(BranchDep("id_FM_M", () => Set("u", "u2"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1) should ===(BranchDep("id_FM_M", () => Set("u", "u2"), () => 3))
 
     info("flatMap + map + as")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("u").flatMap(u => c.get[Int]("u2").map(u2 => u + u2)).as("t")),
-        _.put("u2")(2),
-        t
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("t")
-    )(id = "t", needs = Set("u", "u2"), value = 3)
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1)
+      .as("t") should ===(LeafDep("t", () => Set("u", "id", "u2", "id2"), () => 3))
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1)
+      .as("t") should ===(LeafDep("t", () => Set("u", "id", "u2", "id2"), () => 3))
+
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1)
+      .as("t") should ===(LeafDep("t", () => Set("u", "id", "u2"), () => 3))
+    LeafDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1)
+      .as("t") should ===(LeafDep("t", () => Set("u", "id", "u2"), () => 3))
+
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1)
+      .as("t") should ===(LeafDep("t", () => Set("u", "u2", "id2"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => LeafDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1)
+      .as("t") should ===(LeafDep("t", () => Set("u", "u2", "id2"), () => 3))
+
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1)
+      .as("t") should ===(LeafDep("t", () => Set("u", "u2"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1)
+      .flatMap(i => BranchDep("id2", () => Set("u2"), () => i + 1))
+      .map(_ + 1)
+      .as("t") should ===(LeafDep("t", () => Set("u", "u2"), () => 3))
   }
 
   behavior of "map2"
 
   it should "create a Dep instance with proper id and needs" in {
     info("map2")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("a").map2(c.get[Int]("b"))(_ + _)),
-        _.put("b")(2),
-        _.put("a")(1)
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("a_M2")
-    )(id = "a_M2", needs = Set("a", "b"), value = 3)
+    LeafDep("id", () => Set("u"), () => 1).map2(LeafDep("id2", () => Set("u2"), () => 2))(_ + _) should ===(
+      BranchDep("id_M2", () => Set("u", "id", "u2", "id2"), () => 3))
+    LeafDep("id", () => Set("u"), () => 1).map2(BranchDep("id2", () => Set("u2"), () => 2))(_ + _) should ===(
+      BranchDep("id_M2", () => Set("u", "id", "u2"), () => 3))
+
+    BranchDep("id", () => Set("u"), () => 1).map2(LeafDep("id2", () => Set("u2"), () => 2))(_ + _) should ===(
+      BranchDep("id_M2", () => Set("u", "u2", "id2"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1).map2(BranchDep("id2", () => Set("u2"), () => 2))(_ + _) should ===(
+      BranchDep("id_M2", () => Set("u", "u2"), () => 3))
 
     info("map2 + as")
-    assertDep(
-      Set[Transformation](
-        (c: Catalog) => c.put(c.get[Int]("a").map2(c.get[Int]("b"))(_ + _).as("t")),
-        _.put("b")(2),
-        _.put("a")(1)
-      )
-        .foldLeft(new Catalog)((c, t) => t(c))
-        .get[Int]("t")
-    )(id = "t", needs = Set("a", "b"), value = 3)
-  }
+    LeafDep("id", () => Set("u"), () => 1).map2(LeafDep("id2", () => Set("u2"), () => 2))(_ + _).as("t") should ===(
+      LeafDep("t", () => Set("u", "id", "u2", "id2"), () => 3))
+    LeafDep("id", () => Set("u"), () => 1).map2(BranchDep("id2", () => Set("u2"), () => 2))(_ + _).as("t") should ===(
+      LeafDep("t", () => Set("u", "id", "u2"), () => 3))
 
-  def assertDep[A](dep: Dep[A])(id: String, needs: Set[String], value: A): Assertion = {
-    dep.id should ===(id)
-    dep.needs() should ===(needs)
-    dep() should ===(value)
+    BranchDep("id", () => Set("u"), () => 1).map2(LeafDep("id2", () => Set("u2"), () => 2))(_ + _).as("t") should ===(
+      LeafDep("t", () => Set("u", "u2", "id2"), () => 3))
+    BranchDep("id", () => Set("u"), () => 1).map2(BranchDep("id2", () => Set("u2"), () => 2))(_ + _).as("t") should ===(
+      LeafDep("t", () => Set("u", "u2"), () => 3))
   }
 
 }

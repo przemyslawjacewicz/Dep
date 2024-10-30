@@ -3,6 +3,7 @@ package pl.epsilondeltalimit.dep
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import pl.epsilondeltalimit.dep.catalog.Catalog
+import pl.epsilondeltalimit.dep.catalog.untyped.UntypedCatalog
 import pl.epsilondeltalimit.dep.transformation._
 import pl.epsilondeltalimit.dep.transformation.implicits._
 
@@ -10,7 +11,7 @@ import pl.epsilondeltalimit.dep.transformation.implicits._
 object Runner1 {
   def main(args: Array[String]): Unit = {
 
-    val c: Transformation = (c: Catalog) =>
+    val c: CatalogTransformation = (c: Catalog) =>
       c.put {
         c.get[SparkSession]("spark")
           .flatMap { spark =>
@@ -29,7 +30,7 @@ object Runner1 {
           .as("c")
       }
 
-    val b: Transformation = (c: Catalog) =>
+    val b: CatalogTransformation = (c: Catalog) =>
       c.put {
         c.get[SparkSession]("spark")
           .flatMap { spark =>
@@ -45,7 +46,7 @@ object Runner1 {
           .as("b")
       }
 
-    val a: Transformation = (c: Catalog) => {
+    val a: CatalogTransformation = (c: Catalog) => {
       val spark = c.get[SparkSession]("spark")
 
       val a = spark
@@ -60,7 +61,7 @@ object Runner1 {
       c.put(a)
     }
 
-    val spark: Transformation =
+    val spark: CatalogTransformation =
       (c: Catalog) =>
         c.put("spark") {
           SparkSession.builder
@@ -70,7 +71,7 @@ object Runner1 {
             .getOrCreate()
         }
 
-    val catalog: Catalog = (new Catalog)
+    val catalog: Catalog = (new UntypedCatalog)
       .withTransformations(c, b, a, spark)
 
     println("=== c ===")

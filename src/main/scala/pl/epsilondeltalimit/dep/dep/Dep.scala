@@ -1,6 +1,6 @@
 package pl.epsilondeltalimit.dep.dep
 
-import pl.epsilondeltalimit.dep.catalog.Catalog
+import pl.epsilondeltalimit.dep.catalog.untyped.UntypedCatalog
 
 //todo: consider removing needs forwarding
 //todo: extend () => A is unexpected -> suggests that there are no dependencies for this Dep, which may be not true
@@ -87,16 +87,16 @@ object BranchDep {
 
 object Dep {
 
-  def dep[A](id: String)(value: => A): Dep[A] =
+  def apply[A](id: String)(value: => A): Dep[A] =
     LeafDep[A](id, () => Set.empty, () => value)
 
-  def dep[A](id: String, needs: => Set[String])(value: => A): Dep[A] =
+  def apply[A](id: String, needs: => Set[String])(value: => A): Dep[A] =
     LeafDep[A](id, () => needs, () => value)
 
   object implicits {
 
     implicit class StringImplicits(id: String) {
-      def as[A](implicit c: Catalog): Dep[A] =
+      def as[A](implicit c: UntypedCatalog): Dep[A] =
         c.get[A](id)
     }
 

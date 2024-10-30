@@ -2,31 +2,31 @@ package pl.epsilondeltalimit.dep
 
 package object transformation {
 
-  sealed trait Wrapper[T]
+  sealed trait Wrapper[T <: Transformation]
 
-  case class Transformations(xs: Seq[Transformation]) extends Wrapper[Transformation]
+  case class CatalogTransformations(xs: Seq[CatalogTransformation]) extends Wrapper[CatalogTransformation]
 
-  case class TransformationsWithImplicitCatalog(xs: Seq[TransformationWithImplicitCatalog])
-      extends Wrapper[TransformationWithImplicitCatalog]
+  case class CatalogTransformationsImplicit(xs: Seq[CatalogTransformationImplicit])
+      extends Wrapper[CatalogTransformationImplicit]
 
-  case class PutTransformations(xs: Seq[PutTransformation]) extends Wrapper[PutTransformation]
+  case class DepTransformations(xs: Seq[DepTransformation[_]]) extends Wrapper[DepTransformation[_]]
 
-  case class PutTransformationsWithImplicitCatalog(xs: Seq[PutTransformationWithImplicitCatalog])
-      extends Wrapper[PutTransformationWithImplicitCatalog]
+  case class DepTransformationsImplicit(xs: Seq[DepTransformationImplicit[_]])
+      extends Wrapper[DepTransformationImplicit[_]]
 
   object implicits {
 
-    implicit val wrapTransformations: Seq[Transformation] => Wrapper[Transformation] =
-      Transformations
+    implicit val wrapCatalogTransformations: Seq[CatalogTransformation] => Wrapper[CatalogTransformation] =
+      CatalogTransformations
 
-    implicit val wrapTransformationsWithImplicitCatalog: Seq[TransformationWithImplicitCatalog] => Wrapper[TransformationWithImplicitCatalog] =
-      TransformationsWithImplicitCatalog
+    implicit val wrapCatalogTransformationsImplicit: Seq[CatalogTransformationImplicit] => Wrapper[CatalogTransformationImplicit] =
+      CatalogTransformationsImplicit
 
-    implicit val wrapPutTransformations: Seq[PutTransformation] => Wrapper[PutTransformation] =
-      PutTransformations
+    implicit val wrapDepTransformations: Seq[DepTransformation[_]] => Wrapper[DepTransformation[_]] =
+      DepTransformations
 
-    implicit val wrapPutTransformationsWithImplicitCatalog: Seq[PutTransformationWithImplicitCatalog] => Wrapper[PutTransformationWithImplicitCatalog] =
-      PutTransformationsWithImplicitCatalog
+    implicit val wrapDepTransformationsImplicit: Seq[DepTransformationImplicit[_]] => Wrapper[DepTransformationImplicit[_]] =
+      DepTransformationsImplicit
   }
 
 }
