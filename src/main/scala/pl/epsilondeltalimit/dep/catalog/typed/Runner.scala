@@ -1,7 +1,5 @@
 package pl.epsilondeltalimit.dep.catalog.typed
 
-import pl.epsilondeltalimit.dep.catalog.{Key, Record}
-
 import scala.collection.mutable
 
 object Runner {
@@ -12,10 +10,8 @@ object Runner {
 
     val record: Record = a ~> 1 ++ b ~> "abc" ++ c ~> 1.0f
 
-    val aRecord: Int = record(a)
+    val aRecord: Int    = record(a)
     val bRecord: String = record(b)
-
-
 
 //    val h = HMap(a ~> 1, b ~> "abc")
 //    val aH = h(a)
@@ -25,6 +21,6 @@ object Runner {
 
 //    m.updated("a", m("a") += "b" )
     m("a") += "b"
-    println(m  )
+    println(m)
   }
 }

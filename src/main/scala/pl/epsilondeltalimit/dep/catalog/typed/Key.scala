@@ -1,4 +1,4 @@
-package pl.epsilondeltalimit.dep.catalog
+package pl.epsilondeltalimit.dep.catalog.typed
 
 final class Key[T] {
   def ~>(value: T): Record = new RecordImpl(Map(this -> value))

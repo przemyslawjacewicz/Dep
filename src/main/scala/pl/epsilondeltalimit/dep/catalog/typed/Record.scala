@@ -1,4 +1,4 @@
-package pl.epsilondeltalimit.dep.catalog
+package pl.epsilondeltalimit.dep.catalog.typed
 
 import pl.epsilondeltalimit.dep.dep.Dep
 

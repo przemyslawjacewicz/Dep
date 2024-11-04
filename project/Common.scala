@@ -5,7 +5,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, PathList, assemblyM
 
 object Common {
 
-  val projectScalaVersion = "2.12.15"
+  val projectScalaVersion = "2.13.15"
   val projectOrganization = "pl.epsilondeltalimit"
 
   val assemblyConf = Seq(
@@ -66,44 +66,22 @@ object Common {
         sq.map(_.exclude(org, name))
 
       def excludeAll(rules: ExclusionRule*): Seq[ModuleID] =
-        sq.map(_.excludeAll(rules: _*))
+        sq.map(_.excludeAll(rules *))
 
     }
 
-    private val sparkOrg: String = "org.apache.spark"
-    private val sparkVersion     = "3.2.1"
-
-    lazy val spark = Seq(
-      sparkOrg %% "spark-core"     % sparkVersion,
-      sparkOrg %% "spark-sql"      % sparkVersion,
-      sparkOrg %% "spark-catalyst" % sparkVersion
-    )
-
-    lazy val sparkTests = Seq(
-      sparkOrg %% "spark-sql"      % sparkVersion classifier "tests",
-      sparkOrg %% "spark-core"     % sparkVersion classifier "tests",
-      sparkOrg %% "spark-catalyst" % sparkVersion classifier "tests"
-    )
-
-    lazy val logging = Seq(
+    // todo: update me
+    lazy val logging: Seq[ModuleID] = Seq(
       "log4j" % "log4j" % "1.2.17"
     )
 
-    lazy val scopt = Seq(
-      "com.github.scopt" %% "scopt" % "4.0.1"
+    lazy val scalaTest: Seq[ModuleID] = Seq(
+      "org.scalactic" %% "scalactic" % "3.2.18",
+      "org.scalatest" %% "scalatest" % "3.2.19"
     )
 
-    lazy val scalaTest = Seq(
-      "org.scalactic" %% "scalactic" % "3.2.15",
-      "org.scalatest" %% "scalatest" % "3.2.15"
-    )
-
-    lazy val scalaMock = Seq(
-      "org.scalamock" %% "scalamock" % "5.2.0"
-    )
-
-    lazy val pureConfig = Seq(
-      "com.github.pureconfig" %% "pureconfig" % "0.17.1"
+    lazy val scalaMock: Seq[ModuleID] = Seq(
+      "org.scalamock" %% "scalamock" % "6.0.0"
     )
 
   }

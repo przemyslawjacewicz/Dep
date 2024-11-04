@@ -1,25 +1,22 @@
 package pl.epsilondeltalimit.dep.catalog
 
-import pl.epsilondeltalimit.dep.dep.Dep
-import pl.epsilondeltalimit.dep.transformation.{Transformation, Wrapper}
+import pl.epsilondeltalimit.dep.dep.Result
+import pl.epsilondeltalimit.dep.transformation.Wrapper
 
 trait Catalog {
 
-  def withTransformations[T <: Transformation](ts: T*)(implicit wrapper: Seq[T] => Wrapper[T]): Catalog
+  def withTransformations[T](ts: T*)(implicit wrapper: Seq[T] => Wrapper[T]): Catalog
 
   def put[A](id: String)(value: => A): Catalog
 
-  // todo: consider making this accept LeafDep only
-  def put[A](dep: Dep[A]): Catalog
+  def put[A](r: Result[A]): Catalog
 
-  // todo: consider making this return LeafDep only
-  def get[A](id: String): Dep[A]
+  def get[A](id: String): Result[A]
 
   def eval[A](id: String): A
 
+  def stages(id: String): Seq[Set[String]]
+
   // todo: consider a type for result
-  def explain(id: String): Seq[Set[String]]
-
-  def show(id: String): Unit
-
+  def explain(id: String): String
 }
