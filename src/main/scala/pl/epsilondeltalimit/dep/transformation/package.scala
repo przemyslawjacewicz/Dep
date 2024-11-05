@@ -9,27 +9,27 @@ package object transformation {
 
   case class CatalogTransformations(xs: Seq[Catalog => Catalog]) extends Wrapper[Catalog => Catalog]
 
-  case class CatalogTransformationsImplicit(xs: Seq[CatalogTransformationImplicit])
-      extends Wrapper[CatalogTransformationImplicit]
+  case class CatalogTransformationsWithImplicitCatalog(xs: Seq[CatalogTransformationWithImplicitCatalog])
+      extends Wrapper[CatalogTransformationWithImplicitCatalog]
 
-  case class DepTransformations(xs: Seq[Catalog => Result[_]]) extends Wrapper[Catalog => Result[_]]
+  case class ResultTransformations(xs: Seq[Catalog => Result[_]]) extends Wrapper[Catalog => Result[_]]
 
-  case class DepTransformationsImplicit(xs: Seq[DepTransformationImplicit[_]])
-      extends Wrapper[DepTransformationImplicit[_]]
+  case class ResultTransformationsWithImplicitCatalog(xs: Seq[ResultTransformationWithImplicitCatalog[_]])
+      extends Wrapper[ResultTransformationWithImplicitCatalog[_]]
 
   object implicits {
 
     implicit val wrapCatalogTransformations: Seq[Catalog => Catalog] => Wrapper[Catalog => Catalog] =
       CatalogTransformations
 
-    implicit val wrapCatalogTransformationsImplicit: Seq[CatalogTransformationImplicit] => Wrapper[CatalogTransformationImplicit] =
-      CatalogTransformationsImplicit
+    implicit val wrapCatalogTransformationsWithImplicitCatalog: Seq[CatalogTransformationWithImplicitCatalog] => Wrapper[CatalogTransformationWithImplicitCatalog] =
+      CatalogTransformationsWithImplicitCatalog
 
-    implicit val wrapDepTransformations: Seq[Catalog => Result[_]] => Wrapper[Catalog => Result[_]] =
-      DepTransformations
+    implicit val wrapResultTransformations: Seq[Catalog => Result[_]] => Wrapper[Catalog => Result[_]] =
+      ResultTransformations
 
-    implicit val wrapDepTransformationsImplicit: Seq[DepTransformationImplicit[_]] => Wrapper[DepTransformationImplicit[_]] =
-      DepTransformationsImplicit
+    implicit val wrapResultTransformationsWithImplicitCatalog: Seq[ResultTransformationWithImplicitCatalog[_]] => Wrapper[ResultTransformationWithImplicitCatalog[_]] =
+      ResultTransformationsWithImplicitCatalog
   }
 
 }

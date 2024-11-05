@@ -24,9 +24,9 @@ class UntypedCatalog extends Catalog {
   override def withTransformations[T](ts: T*)(implicit wrapper: Seq[T] => Wrapper[T]): Catalog =
     wrapper(ts) match {
       case CatalogTransformations(xs)         => xs.foldLeft(this: Catalog)((c, t) => t(c))
-      case CatalogTransformationsImplicit(xs) => xs.foldLeft(this: Catalog)((c, t) => t(c))
-      case DepTransformations(xs)             => xs.foldLeft(this: Catalog)((c, pt) => c.put(pt(c)))
-      case DepTransformationsImplicit(xs)     => xs.foldLeft(this: Catalog)((c, pt) => c.put(pt(c)))
+      case CatalogTransformationsWithImplicitCatalog(xs) => xs.foldLeft(this: Catalog)((c, t) => t(c))
+      case ResultTransformations(xs)             => xs.foldLeft(this: Catalog)((c, pt) => c.put(pt(c)))
+      case ResultTransformationsWithImplicitCatalog(xs)     => xs.foldLeft(this: Catalog)((c, pt) => c.put(pt(c)))
     }
 
   override def put[A](id: String)(value: => A): Catalog = {

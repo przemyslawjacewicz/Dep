@@ -46,30 +46,30 @@ class UntypedCatalogTest extends AnyWordSpec with Matchers {
     "catalog transformations with implicit catalog are added" should {
       "evaluate the result for resources without dependencies" in {
         (new UntypedCatalog)
-          .withTransformations(new CatalogTransformationImplicit {
+          .withTransformations(new CatalogTransformationWithImplicitCatalog {
             override def apply(implicit c: Catalog): Catalog =
               c.put("u")("u")
           })
           .eval[String]("u") should ===("u")
 
         (new UntypedCatalog)
-          .withTransformations[CatalogTransformationImplicit]((c: Catalog) => c.put("u")("u"))
+          .withTransformations[CatalogTransformationWithImplicitCatalog]((c: Catalog) => c.put("u")("u"))
           .eval[String]("u") should ===("u")
 
       }
 
       "evaluate the result for resources with dependencies" in {
-        val w = new CatalogTransformationImplicit {
+        val w = new CatalogTransformationWithImplicitCatalog {
           override def apply(implicit c: Catalog): Catalog =
             c.put("w")(c.get[String]("u")() + "w")
         }
-        val u = new CatalogTransformationImplicit {
+        val u = new CatalogTransformationWithImplicitCatalog {
           override def apply(implicit c: Catalog): Catalog =
             c.put("u")("u")
         }
 
         val c = (new UntypedCatalog)
-          .withTransformations[CatalogTransformationImplicit](w, u)
+          .withTransformations[CatalogTransformationWithImplicitCatalog](w, u)
 
         c.eval[String]("w") should ===("uw")
         c.eval[String]("u") should ===("u")
@@ -100,29 +100,29 @@ class UntypedCatalogTest extends AnyWordSpec with Matchers {
 
       "evaluate the result for resources without dependencies" in {
         (new UntypedCatalog)
-          .withTransformations[DepTransformationImplicit[_]](new DepTransformationImplicit[String] {
+          .withTransformations[ResultTransformationWithImplicitCatalog[_]](new ResultTransformationWithImplicitCatalog[String] {
             override def apply(implicit c: Catalog): Result[String] =
               Dep("u")("u")
           })
           .eval[String]("u") should ===("u")
 
         (new UntypedCatalog)
-          .withTransformations[DepTransformationImplicit[_]]((_: Catalog) => Dep("u")("u"))
+          .withTransformations[ResultTransformationWithImplicitCatalog[_]]((_: Catalog) => Dep("u")("u"))
           .eval[String]("u") should ===("u")
       }
 
       "evaluate the result for resources with dependencies" in {
-        val w = new DepTransformationImplicit[String] {
+        val w = new ResultTransformationWithImplicitCatalog[String] {
           override def apply(implicit c: Catalog): Result[String] =
             Dep("w")(c.get[String]("u")() + "w")
         }
-        val u = new DepTransformationImplicit[String] {
+        val u = new ResultTransformationWithImplicitCatalog[String] {
           override def apply(implicit c: Catalog): Result[String] =
             Dep("u")("u")
         }
 
         val c = (new UntypedCatalog)
-          .withTransformations[DepTransformationImplicit[_]](w, u)
+          .withTransformations[ResultTransformationWithImplicitCatalog[_]](w, u)
 
         c.eval[String]("w") should ===("uw")
         c.eval[String]("u") should ===("u")
