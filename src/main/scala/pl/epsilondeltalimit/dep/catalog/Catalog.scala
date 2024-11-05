@@ -15,8 +15,8 @@ trait Catalog {
 
   def eval[A](id: String): A
 
+  // todo: consider a type for result
   def stages(id: String): Seq[Set[String]]
 
-  // todo: consider a type for result
   def explain(id: String): String
 }

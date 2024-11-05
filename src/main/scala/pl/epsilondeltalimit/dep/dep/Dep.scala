@@ -1,6 +1,5 @@
 package pl.epsilondeltalimit.dep.dep
 
-//todo: consider removing needs forwarding
 //todo: extend () => A is unexpected -> suggests that there are no dependencies for this Dep, which may be not true
 sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val value: () => A) extends (() => A) {
   private lazy val cached = value()
@@ -61,7 +60,6 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
 
 }
 
-//todo: consider a different name - Result, Res, Final, EndDep => Result
 case class Result[A] private[dep] (override val id: String,
                                    override val needs: () => Set[String],
                                    override val value: () => A)
@@ -72,7 +70,6 @@ object Result {
     new Result(id, needs, value)
 }
 
-//todo: consider a different name - Intermediate, Inter, IDep, Transitive, Part => Part
 case class Part[A] private[dep] (override val id: String,
                                  override val needs: () => Set[String],
                                  override val value: () => A)
