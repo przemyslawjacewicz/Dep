@@ -5,6 +5,7 @@ import pl.epsilondeltalimit.dep.dep.Result
 
 trait DepTransformationImplicit[A] {
 
+  //todo: move me
   implicit class StringImplicits(id: String) {
     def as[T](implicit c: Catalog): Result[T] =
       c.get[T](id)

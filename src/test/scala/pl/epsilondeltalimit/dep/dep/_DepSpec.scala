@@ -5,7 +5,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import pl.epsilondeltalimit.dep.catalog.Catalog
 import pl.epsilondeltalimit.dep.catalog.untyped.UntypedCatalog
-import pl.epsilondeltalimit.dep.transformation.CatalogTransformation
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration

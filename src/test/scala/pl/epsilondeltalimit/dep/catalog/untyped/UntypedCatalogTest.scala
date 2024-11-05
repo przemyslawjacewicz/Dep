@@ -17,14 +17,8 @@ class UntypedCatalogTest extends AnyWordSpec with Matchers {
         a[RuntimeException] should be thrownBy {
           (new UntypedCatalog)
             .withTransformations(
-              new CatalogTransformation {
-                override def apply(c: Catalog): Catalog =
-                  c.put("u")("u1")
-              },
-              new CatalogTransformation {
-                override def apply(c: Catalog): Catalog =
-                  c.put("u")("u2")
-              }
+              (c: Catalog) => c.put("u")("u1"),
+              (c: Catalog) => c.put("u")("u2")
             )
             .eval[String]("u")
         }
@@ -32,29 +26,16 @@ class UntypedCatalogTest extends AnyWordSpec with Matchers {
 
       "evaluate the result for resources without dependencies" in {
         (new UntypedCatalog)
-          .withTransformations(new CatalogTransformation {
-            override def apply(c: Catalog): Catalog =
-              c.put("u")("u")
-          })
-          .eval[String]("u") should ===("u")
-
-        (new UntypedCatalog)
-          .withTransformations[CatalogTransformation]((c: Catalog) => c.put("u")("u"))
+          .withTransformations((c: Catalog) => c.put("u")("u"))
           .eval[String]("u") should ===("u")
       }
 
       "evaluate the result for resources with dependencies" in {
-        val w = new CatalogTransformation {
-          override def apply(c: Catalog): Catalog =
-            c.put("w")(c.get[String]("u")() + "w")
-        }
-        val u = new CatalogTransformation {
-          override def apply(c: Catalog): Catalog =
-            c.put("u")("u")
-        }
+        val w = (c: Catalog) => c.put("w")(c.get[String]("u")() + "w")
+        val u = (c: Catalog) => c.put("u")("u")
 
         val c = (new UntypedCatalog)
-          .withTransformations[CatalogTransformation](w, u)
+          .withTransformations(w, u)
 
         c.eval[String]("w") should ===("uw")
         c.eval[String]("u") should ===("u")
@@ -99,34 +80,20 @@ class UntypedCatalogTest extends AnyWordSpec with Matchers {
     "dep transformations are added" should {
       "evaluate the result for resources without dependencies" in {
         (new UntypedCatalog)
-          .withTransformations[DepTransformation[_]](new DepTransformation[String] {
-            override def apply(c: Catalog): Result[String] =
-              Dep("u")("u")
-          })
-          .eval[String]("u") should ===("u")
-
-        (new UntypedCatalog)
-          .withTransformations[DepTransformation[_]]((_: Catalog) => Dep("u")("u"))
+          .withTransformations[Catalog => Result[_]]((_: Catalog) => Dep("u")("u"))
           .eval[String]("u") should ===("u")
       }
 
       "evaluate the result for resources with dependencies" in {
-        val w = new DepTransformation[String] {
-          override def apply(c: Catalog): Result[String] =
-            Dep("w")(c.get[String]("u")() + "w")
-        }
-        val u = new DepTransformation[String] {
-          override def apply(c: Catalog): Result[String] =
-            Dep("u")("u")
-        }
+        val w = (c: Catalog) => Dep("w")(c.get[String]("u")() + "w")
+        val u = (_: Catalog) => Dep("u")("u")
 
         val c = (new UntypedCatalog)
-          .withTransformations[DepTransformation[_]](w, u)
+          .withTransformations[Catalog => Result[_]](w, u)
 
         c.eval[String]("w") should ===("uw")
         c.eval[String]("u") should ===("u")
       }
-
     }
 
     "dep transformations with implicit catalog are added" should {

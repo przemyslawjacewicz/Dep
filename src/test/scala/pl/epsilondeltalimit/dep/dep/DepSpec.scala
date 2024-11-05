@@ -3,7 +3,7 @@ package pl.epsilondeltalimit.dep.dep
 import org.scalactic.Equality
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import pl.epsilondeltalimit.dep.transformation.CatalogTransformation
+import pl.epsilondeltalimit.dep.catalog.Catalog
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration
@@ -18,7 +18,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
       .id}, needs=${b.asInstanceOf[Dep[_]].needs()}, value=${b.asInstanceOf[Dep[_]].value()}")
     b match {
       case d: Dep[Int] => a.getClass == d.getClass && a.id == d.id && a.needs() == d.needs() && a.value() == d.value()
-      case _         => false
+      case _           => false
     }
   }
 
@@ -41,7 +41,7 @@ class DepSpec extends AnyFlatSpec with Matchers {
 
   behavior of "map"
 
-  val t: CatalogTransformation = _.put("u")(1)
+  val t: Catalog => Catalog = (_: Catalog).put("u")(1)
 
   it should "create a Dep instance with proper id and needs" in {
     info("map")

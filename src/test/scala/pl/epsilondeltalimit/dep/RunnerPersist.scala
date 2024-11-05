@@ -2,7 +2,6 @@ package pl.epsilondeltalimit.dep
 
 import pl.epsilondeltalimit.dep.catalog.Catalog
 import pl.epsilondeltalimit.dep.catalog.untyped.UntypedCatalog
-import pl.epsilondeltalimit.dep.transformation.CatalogTransformation
 import pl.epsilondeltalimit.dep.transformation.implicits._
 
 import java.nio.file.{Files, Path}
@@ -12,7 +11,7 @@ object RunnerPersist {
 
   def main(args: Array[String]): Unit = {
 
-    val b: CatalogTransformation = c =>
+    val b = (c: Catalog) =>
       c.put {
         c.get[Path]("a")
           .map { aPath =>
@@ -23,7 +22,7 @@ object RunnerPersist {
           }
           .as("b")
       }
-    val a: CatalogTransformation = c =>
+    val a = (c: Catalog) =>
       c.put("a") {
         val aPath = save("a")
         println(s"a: $aPath")
