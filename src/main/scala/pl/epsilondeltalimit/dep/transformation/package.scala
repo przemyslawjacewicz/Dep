@@ -30,6 +30,12 @@ package object transformation {
 
     implicit val wrapResultTransformationsWithImplicitCatalog: Seq[ResultTransformationWithImplicitCatalog[_]] => Wrapper[ResultTransformationWithImplicitCatalog[_]] =
       ResultTransformationsWithImplicitCatalog
+
+    implicit class StringImplicits(id: String) {
+      def as[T](implicit c: Catalog): Result[T] =
+        c.get[T](id)
+    }
+
   }
 
 }
