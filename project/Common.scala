@@ -76,7 +76,7 @@ object Common {
     )
 
     lazy val scalaTest: Seq[ModuleID] = Seq(
-      "org.scalactic" %% "scalactic" % "3.2.18",
+      "org.scalactic" %% "scalactic" % "3.2.19",
       "org.scalatest" %% "scalatest" % "3.2.19"
     )
 
