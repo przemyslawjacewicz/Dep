@@ -1,13 +1,11 @@
 package pl.epsilondeltalimit.dep.dep
 
-//todo: extend () => A is unexpected -> suggests that there are no dependencies for this Dep, which may be not true
 sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val value: () => A) extends (() => A) {
   private lazy val cached = value()
 
   override def apply(): A =
     cached
 
-  // todo: consider random id
   def map[B](f: A => B): Dep[B] =
     this match {
       case _: Result[_] =>
@@ -54,7 +52,6 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
         Part[B](s"${id}_FM", () => getNeeds, () => f(apply()).apply())
     }
 
-  // todo: consider a different name e.g. collect
   def as(id: String): Result[A] =
     Result[A](id, needs, apply)
 
@@ -88,7 +85,6 @@ object Dep {
   def apply[A](id: String)(value: => A): Result[A] =
     Result[A](id, () => Set.empty, () => value)
 
-  // todo: check how can we make it not visible to outside
   def apply[A](id: String, needs: => Set[String])(value: => A): Result[A] =
     Result[A](id, () => needs, () => value)
 

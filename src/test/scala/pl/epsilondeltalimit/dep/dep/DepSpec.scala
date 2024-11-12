@@ -12,12 +12,12 @@ import scala.concurrent.duration.Duration
 
 class DepSpec extends AnyFlatSpec with Matchers {
 
-  // todo: move to main ?
   implicit val depEq: Equality[Dep[Int]] = (a: Dep[Int], b: Any) => {
-    println(s"DEBUG: a.class=${a.getClass}, id=${a.id}, needs=${a.needs()}, value=${a.value()}")
-    println(s"DEBUG: b.class=${b.getClass}, id=${b
-      .asInstanceOf[Dep[_]]
-      .id}, needs=${b.asInstanceOf[Dep[_]].needs()}, value=${b.asInstanceOf[Dep[_]].value()}")
+    println(
+      s"[depEq]: a.class=${a.getClass.getSimpleName}, id=${a.id}, needs=${a.needs().mkString(",")}, value=${a.value()}")
+    val bDep = b.asInstanceOf[Dep[_]]
+    println(
+      s"[depEq]: b.class=${b.getClass.getSimpleName}, id=${bDep.id}, needs=${bDep.needs().mkString(",")}, value=${bDep.value()}")
     b match {
       case d: Dep[Int] => a.getClass == d.getClass && a.id == d.id && a.needs() == d.needs() && a.value() == d.value()
       case _           => false
@@ -25,10 +25,12 @@ class DepSpec extends AnyFlatSpec with Matchers {
   }
 
   implicit val resultDepEq: Equality[Result[Int]] = (a: Result[Int], b: Any) => {
-    println(s"DEBUG: a.class=${a.getClass}, id=${a.id}, needs=${a.needs()}, value=${a.value()}")
-    println(s"DEBUG: b.class=${b.getClass}, id=${b
-      .asInstanceOf[Dep[_]]
-      .id}, needs=${b.asInstanceOf[Dep[_]].needs()}, value=${b.asInstanceOf[Dep[_]].value()}")
+    println(
+      s"[resultDepEq]: a.class=${a.getClass.getSimpleName}, id=${a.id}, needs=${a.needs().mkString(",")}, value=${a.value()}")
+    val bDep = b.asInstanceOf[Dep[_]]
+    println(
+      s"[resultDepEq]: b.class=${b.getClass.getSimpleName}, id=${bDep.id}, needs=${bDep.needs().mkString(",")}, value=${bDep
+        .value()}")
     b match {
       case d: Result[Int] => a.id == d.id && a.needs() == d.needs() && a.value() == d.value()
       case _              => false
@@ -36,10 +38,12 @@ class DepSpec extends AnyFlatSpec with Matchers {
   }
 
   implicit val partDepEq: Equality[Part[Int]] = (a: Part[Int], b: Any) => {
-    println(s"DEBUG: a.class=${a.getClass}, id=${a.id}, needs=${a.needs()}, value=${a.value()}")
-    println(s"DEBUG: b.class=${b.getClass}, id=${b
-      .asInstanceOf[Dep[_]]
-      .id}, needs=${b.asInstanceOf[Dep[_]].needs()}, value=${b.asInstanceOf[Dep[_]].value()}")
+    println(
+      s"[partDepEq]: a.class=${a.getClass.getSimpleName}, id=${a.id}, needs=${a.needs().mkString(",")}, value=${a.value()}")
+    val bDep = b.asInstanceOf[Dep[_]]
+    println(
+      s"[partDepEq]: b.class=${b.getClass.getSimpleName}, id=${bDep.id}, needs=${bDep.needs().mkString(",")}, value=${bDep
+        .value()}")
     b match {
       case d: Part[Int] => a.id == d.id && a.needs() == d.needs() && a.value() == d.value()
       case _            => false
