@@ -58,6 +58,9 @@ sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val v
   def as(id: String): Result[A] =
     Result[A](id, needs, apply)
 
+  override def toString(): String =
+    s"${getClass.getSimpleName}: id=$id, needs=${needs()}, value=${value()}"
+
 }
 
 case class Result[A] private[dep] (override val id: String,

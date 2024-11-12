@@ -1,6 +1,7 @@
 package pl.epsilondeltalimit.dep.dep
 
 import org.scalactic.Equality
+import org.scalactic.Equality.{default => _}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import pl.epsilondeltalimit.dep.catalog.Catalog
@@ -11,6 +12,7 @@ import scala.concurrent.duration.Duration
 
 class DepSpec extends AnyFlatSpec with Matchers {
 
+  // todo: move to main ?
   implicit val depEq: Equality[Dep[Int]] = (a: Dep[Int], b: Any) => {
     println(s"DEBUG: a.class=${a.getClass}, id=${a.id}, needs=${a.needs()}, value=${a.value()}")
     println(s"DEBUG: b.class=${b.getClass}, id=${b
@@ -19,6 +21,28 @@ class DepSpec extends AnyFlatSpec with Matchers {
     b match {
       case d: Dep[Int] => a.getClass == d.getClass && a.id == d.id && a.needs() == d.needs() && a.value() == d.value()
       case _           => false
+    }
+  }
+
+  implicit val resultDepEq: Equality[Result[Int]] = (a: Result[Int], b: Any) => {
+    println(s"DEBUG: a.class=${a.getClass}, id=${a.id}, needs=${a.needs()}, value=${a.value()}")
+    println(s"DEBUG: b.class=${b.getClass}, id=${b
+      .asInstanceOf[Dep[_]]
+      .id}, needs=${b.asInstanceOf[Dep[_]].needs()}, value=${b.asInstanceOf[Dep[_]].value()}")
+    b match {
+      case d: Result[Int] => a.id == d.id && a.needs() == d.needs() && a.value() == d.value()
+      case _              => false
+    }
+  }
+
+  implicit val partDepEq: Equality[Part[Int]] = (a: Part[Int], b: Any) => {
+    println(s"DEBUG: a.class=${a.getClass}, id=${a.id}, needs=${a.needs()}, value=${a.value()}")
+    println(s"DEBUG: b.class=${b.getClass}, id=${b
+      .asInstanceOf[Dep[_]]
+      .id}, needs=${b.asInstanceOf[Dep[_]].needs()}, value=${b.asInstanceOf[Dep[_]].value()}")
+    b match {
+      case d: Part[Int] => a.id == d.id && a.needs() == d.needs() && a.value() == d.value()
+      case _            => false
     }
   }
 
