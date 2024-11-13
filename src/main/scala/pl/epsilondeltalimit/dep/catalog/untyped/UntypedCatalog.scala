@@ -23,8 +23,8 @@ class UntypedCatalog extends Catalog {
 
   override def withTransformations[T](ts: T*)(implicit wrapper: Seq[T] => Wrapper[T]): Catalog =
     wrapper(ts) match {
-      case CatalogTransformations(xs)         => xs.foldLeft(this: Catalog)((c, t) => t(c))
-      case ResultTransformations(xs)             => xs.foldLeft(this: Catalog)((c, pt) => c.put(pt(c)))
+      case CatalogTransformations(xs) => xs.foldLeft(this: Catalog)((c, t) => t(c))
+      case ResultTransformations(xs)  => xs.foldLeft(this: Catalog)((c, pt) => c.put(pt(c)))
     }
 
   override def put[A](id: String)(value: => A): Catalog = {
@@ -46,6 +46,9 @@ class UntypedCatalog extends Catalog {
     stages(id).foreach(_.foreach(byId(_)()))
     get[A](id)()
   }
+
+  override def run(): Unit =
+    s.map(_.id).foreach(id => stages(id).foreach(_.foreach(byId(_)())))
 
   override def stages(id: String): Seq[Set[String]] = {
     @tailrec
