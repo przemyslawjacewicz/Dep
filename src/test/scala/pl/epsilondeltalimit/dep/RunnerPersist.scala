@@ -7,6 +7,7 @@ import pl.epsilondeltalimit.dep.transformation.implicits._
 import java.nio.file.{Files, Path}
 import scala.io.Source
 
+//todo: for this kind of use case it's necessary to have an `evalAll' equivalent
 object RunnerPersist {
 
   def main(args: Array[String]): Unit = {
