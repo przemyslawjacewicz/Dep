@@ -3,8 +3,8 @@ package pl.epsilondeltalimit.dep.catalog.untyped
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import pl.epsilondeltalimit.dep.catalog.Catalog
-import pl.epsilondeltalimit.dep.dep.{Dep, Result}
 import pl.epsilondeltalimit.dep.transformation.implicits._
+import pl.epsilondeltalimit.dep.{Dep, Result}
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration
@@ -52,7 +52,7 @@ class UntypedCatalogTest extends AnyWordSpec with Matchers {
         val c = (new UntypedCatalog)
           .withTransformations[Catalog => Catalog](x, w, u)
 
-        c.run()
+        c.eval[String]()
 
         time(c.get[String]("u")()) should be < Duration(1, duration.SECONDS).toNanos
         time(c.get[String]("w")()) should be < Duration(1, duration.SECONDS).toNanos
@@ -99,7 +99,7 @@ class UntypedCatalogTest extends AnyWordSpec with Matchers {
         val c = (new UntypedCatalog)
           .withTransformations[Catalog => Result[_]](x, w, u)
 
-        c.run()
+        c.eval[String]()
 
         time(c.get[String]("u")()) should be < Duration(1, duration.SECONDS).toNanos
         time(c.get[String]("w")()) should be < Duration(1, duration.SECONDS).toNanos

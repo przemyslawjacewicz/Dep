@@ -1,4 +1,4 @@
-package pl.epsilondeltalimit.dep.dep
+package pl.epsilondeltalimit.dep
 
 sealed abstract class Dep[A](val id: String, val needs: () => Set[String], val value: () => A) extends (() => A) {
   private lazy val cached = value()

@@ -1,8 +1,8 @@
 package pl.epsilondeltalimit.dep.catalog.untyped
 
 import pl.epsilondeltalimit.dep.catalog.Catalog
-import pl.epsilondeltalimit.dep.dep.{Dep, Result}
 import pl.epsilondeltalimit.dep.transformation._
+import pl.epsilondeltalimit.dep.{Dep, Result}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -42,13 +42,16 @@ class UntypedCatalog extends Catalog {
       .getOrElse(id, Dep(id, byId(id).needs())(byId(id)()))
       .asInstanceOf[Result[A]]
 
+  override def ids: Set[String] =
+    s.map(_.id).toSet
+
   override def eval[A](id: String): A = {
     stages(id).foreach(_.foreach(byId(_)()))
     get[A](id)()
   }
 
-  override def run(): Unit =
-    s.map(_.id).foreach(id => stages(id).foreach(_.foreach(byId(_)())))
+//  override def run(): Unit =
+//    s.map(_.id).foreach(id => stages(id).foreach(_.foreach(byId(_)())))
 
   override def stages(id: String): Seq[Set[String]] = {
     @tailrec

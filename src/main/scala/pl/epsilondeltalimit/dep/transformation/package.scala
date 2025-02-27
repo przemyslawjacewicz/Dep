@@ -1,7 +1,6 @@
 package pl.epsilondeltalimit.dep
 
 import pl.epsilondeltalimit.dep.catalog.Catalog
-import pl.epsilondeltalimit.dep.dep.Result
 
 package object transformation {
 

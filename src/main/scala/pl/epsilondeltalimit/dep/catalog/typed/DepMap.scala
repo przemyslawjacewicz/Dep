@@ -1,7 +1,6 @@
 package pl.epsilondeltalimit.dep.catalog.typed
 
-import pl.epsilondeltalimit.dep.dep.Dep
-
+import pl.epsilondeltalimit.dep.Dep
 import scala.collection.mutable
 
 //todo: consider a better name

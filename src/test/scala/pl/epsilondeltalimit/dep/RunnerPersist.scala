@@ -7,39 +7,42 @@ import pl.epsilondeltalimit.dep.transformation.implicits._
 import java.nio.file.{Files, Path}
 import scala.io.Source
 
-//todo: for this kind of use case it's necessary to have an `evalAll' equivalent
 object RunnerPersist {
 
   def main(args: Array[String]): Unit = {
 
+    // b
     val b = (c: Catalog) =>
       c.put {
-        c.get[Path]("a")
-          .map { aPath =>
-            val a     = read(aPath)
-            val bPath = save(a + "b")
-            println(s"b: $bPath")
-            bPath
-          }
+        c.get[String]("a")
+          .map(a => a + "b")
           .as("b")
       }
-    val a = (c: Catalog) =>
-      c.put("a") {
-        val aPath = save("a")
-        println(s"a: $aPath")
-        aPath
-      }
 
+    // a
+    val aPath = Files.createTempFile(null, null)
+    save(aPath)("a")
+    val a = (c: Catalog) => c.ref("a")(aPath)(read)
+
+    // eval
     val catalog: Catalog = (new UntypedCatalog)
       .withTransformations(b, a)
 
     println(catalog.explain("b"))
     println(catalog.eval[String]("b"))
 
+    val bPath = Files.createTempFile(null, null)
+//    catalog.run[String]("b")(save(bPath))
+    catalog.run {
+      case "b" => b => save(bPath)(b.toString)
+      case "a" => _ => {}
+    }
   }
 
-  def save(content: String): Path =
-    Files.write(Files.createTempFile(null, null), content.getBytes)
+  def save(path: Path): String => Unit = content => {
+    println(s"save: path=${path.toString}, content=$content")
+    Files.write(path, content.getBytes)
+  }
 
   def read(path: Path): String = {
     val b = Source.fromFile(path.toFile)

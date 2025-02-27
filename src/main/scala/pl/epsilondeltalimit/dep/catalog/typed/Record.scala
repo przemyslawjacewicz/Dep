@@ -1,6 +1,6 @@
 package pl.epsilondeltalimit.dep.catalog.typed
 
-import pl.epsilondeltalimit.dep.dep.Dep
+import pl.epsilondeltalimit.dep.Dep
 
 sealed trait Record {
   def apply[T](key: Key[T]): T
