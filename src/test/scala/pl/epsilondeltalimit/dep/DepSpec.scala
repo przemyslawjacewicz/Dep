@@ -19,8 +19,10 @@ class DepSpec extends AnyFlatSpec with Matchers {
     println(
       s"[depEq]: b.class=${b.getClass.getSimpleName}, id=${bDep.id}, needs=${bDep.needs().mkString(",")}, value=${bDep.value()}")
     b match {
-      case d: Dep[_] => a.getClass == d.getClass && a.id == d.id && a.needs() == d.needs() && a.value() == d.value()
-      case _           => false
+      case d: Dep[_] =>
+        a.getClass == d.getClass && a.id == d.id && a.needs() == d.needs() && a.value() == d.value().asInstanceOf[Int]
+      case _ =>
+        false
     }
   }
 
@@ -32,8 +34,8 @@ class DepSpec extends AnyFlatSpec with Matchers {
       s"[resultDepEq]: b.class=${b.getClass.getSimpleName}, id=${bDep.id}, needs=${bDep.needs().mkString(",")}, value=${bDep
         .value()}")
     b match {
-      case d: Result[_] => a.id == d.id && a.needs() == d.needs() && a.value() == d.value()
-      case _              => false
+      case d: Result[_] => a.id == d.id && a.needs() == d.needs() && a.value() == d.value().asInstanceOf[Int]
+      case _            => false
     }
   }
 
@@ -45,8 +47,8 @@ class DepSpec extends AnyFlatSpec with Matchers {
       s"[partDepEq]: b.class=${b.getClass.getSimpleName}, id=${bDep.id}, needs=${bDep.needs().mkString(",")}, value=${bDep
         .value()}")
     b match {
-      case d: Part[_] => a.id == d.id && a.needs() == d.needs() && a.value() == d.value()
-      case _            => false
+      case d: Part[_] => a.id == d.id && a.needs() == d.needs() && a.value() == d.value().asInstanceOf[Int]
+      case _          => false
     }
   }
 
