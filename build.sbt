@@ -1,20 +1,11 @@
-import Common.*
-import Common.Library.implicits
-import sbt.project
+name         := "dep"
+organization := "pl.epsilondeltalimit"
+version      := "0.1"
 
-name    := "Dep"
-version := "0.1"
+scalaVersion := "2.13.15"
 
-updateSbtClassifiers / useCoursier := true
-
-lazy val root = (project in file("."))
-  .settings(Common.settings(ProjectVersion(0, 1)))
-  .settings(Common.assemblyConf)
-  .settings(
-    libraryDependencies ++= Library.logging, // todo: fix me
-    libraryDependencies ++= Library.scalaTest % Test,
-    libraryDependencies ++= Library.scalaMock % Test
-  )
-  .settings(
-    Test / packageBin / publishArtifact := true
-  )
+libraryDependencies ++= Seq(
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
+  "org.scalactic"              %% "scalactic"     % "3.2.19",
+  "org.scalatest"              %% "scalatest"     % "3.2.19" % Test
+)
